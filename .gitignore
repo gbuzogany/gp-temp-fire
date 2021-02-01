@@ -1,0 +1,2 @@
+mdk/armgcc/_build/**
+.vscode/.cortex-debug**
