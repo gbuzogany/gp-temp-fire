@@ -5,9 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "nrf52",
+            "name": "fire",
             "cwd": "${workspaceRoot}",
-            "executable": "./mdk/armgcc/_build/nrf52840_xxaa.out",
+            "executable": "./fire/mdk/armgcc/_build/nrf52840_xxaa.out",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "NRF52840_XXAA",
+            "interface": "swd",
+            "runToMain": true
+        },
+        {
+            "name": "garage",
+            "cwd": "${workspaceRoot}",
+            "executable": "./garage/mdk/armgcc/_build/nrf52840_xxaa.out",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "jlink",

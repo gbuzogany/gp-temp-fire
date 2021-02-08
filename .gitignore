@@ -1,2 +1,3 @@
-mdk/armgcc/_build/**
+fire/mdk/armgcc/_build/**
+garage/mdk/armgcc/_build/**
 .vscode/.cortex-debug**
