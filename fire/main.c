@@ -42,9 +42,11 @@ const nrf_drv_timer_t TEMP_TIMER = NRF_DRV_TIMER_INSTANCE(2);
 
 // lvgl
 
-lv_obj_t *label;
-lv_obj_t *btn1;
-lv_obj_t *btn2;
+lv_obj_t *fire_temp_label;
+lv_obj_t *garage_temp_label;
+lv_obj_t *fire_img;
+
+LV_IMG_DECLARE(fire);
 
 static lv_disp_buf_t disp_buf;
 static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX / 10];                     /*Declare a buffer for 1/10 screen size*/
@@ -81,11 +83,7 @@ bool my_touchpad_read(struct _lv_indev_drv_t * indev_drv, lv_indev_data_t * data
 
 static void event_handler_btn(lv_obj_t * obj, lv_event_t event){
     if(event == LV_EVENT_CLICKED) {
-        if (obj == btn1)
-        lv_label_set_text(label, "Hello");
-        else if (obj == btn2){
-          lv_label_set_text(label, "Goodbye");
-        }
+
     }
 }
 // end lvgl
@@ -290,13 +288,13 @@ static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t l
 {
     if (led_state)
     {
-        lv_label_set_text(label, "ON");
+        // lv_label_set_text(label, "ON");
         // nrf_gpio_pin_write(PIN_CAMERA, 1);
         // NRF_LOG_INFO("Received LED ON!");
     }
     else
     {
-        lv_label_set_text(label, "OFF");
+        // lv_label_set_text(label, "OFF");
         // nrf_gpio_pin_write(PIN_CAMERA, 0);
         // NRF_LOG_INFO("Received LED OFF!");
     }
@@ -611,6 +609,10 @@ int main(void)
 
     lv_init();
 
+    static lv_style_t bigStyle;
+    lv_style_init(&bigStyle);
+    lv_style_set_text_font(&bigStyle, LV_STATE_DEFAULT, &lv_font_montserrat_36);
+
     lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 10);    /*Initialize the display buffer*/
 
     lv_disp_drv_init(&disp_drv);          /*Basic initialization*/
@@ -624,26 +626,29 @@ int main(void)
     lv_indev_drv_register(&indev_drv);         /*Finally register the driver*/
 
     lv_obj_t *screenMain = lv_obj_create(NULL, NULL);
-    label = lv_label_create(screenMain, NULL);
-    lv_label_set_long_mode(label, LV_LABEL_LONG_BREAK);
-    lv_label_set_text(label, "Press a button");
-    lv_label_set_align(label, LV_LABEL_ALIGN_LEFT);
-    lv_obj_set_size(label, 160, 40);
-    lv_obj_set_pos(label, 10, 0);
+    fire_temp_label = lv_label_create(screenMain, NULL);
+    lv_label_set_long_mode(fire_temp_label, LV_LABEL_LONG_BREAK);
+    lv_label_set_text(fire_temp_label, "...");
+    lv_label_set_align(fire_temp_label, LV_LABEL_ALIGN_RIGHT);
+    lv_obj_set_size(fire_temp_label, 160, 40);
+    lv_obj_set_pos(fire_temp_label, 0, 0);
+    lv_obj_add_style(fire_temp_label, LV_LABEL_PART_MAIN, &bigStyle);
+
+    garage_temp_label = lv_label_create(screenMain, NULL);
+    lv_label_set_long_mode(garage_temp_label, LV_LABEL_LONG_BREAK);
+    lv_label_set_text(garage_temp_label, "...");
+    lv_label_set_align(garage_temp_label, LV_LABEL_ALIGN_RIGHT);
+    lv_obj_set_size(garage_temp_label, 160, 40);
+    lv_obj_set_pos(garage_temp_label, 0, 40);
+    lv_obj_add_style(garage_temp_label, LV_LABEL_PART_MAIN, &bigStyle);
+
+    lv_obj_t * img1 = lv_img_create(screenMain, NULL);
+    lv_img_set_src(img1, &fire);
+    // lv_obj_set_size(img1, 160, 40);
+    lv_obj_align(img1, NULL, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_set_pos(img1, 0, 0);
 
     UNUSED_VARIABLE(event_handler_btn);
-
-    btn1 = lv_btn_create(screenMain, NULL);
-    lv_obj_set_event_cb(btn1, event_handler_btn);
-    lv_obj_set_width(btn1, 70);
-    lv_obj_set_height(btn1, 32);
-    lv_obj_set_pos(btn1, 10, 40);
-
-    btn2 = lv_btn_create(screenMain, NULL);
-    lv_obj_set_event_cb(btn2, event_handler_btn);
-    lv_obj_set_width(btn2, 70);
-    lv_obj_set_height(btn2, 32);
-    lv_obj_set_pos(btn2, 100, 40);
 
     lv_anim_t a;
     lv_anim_init(&a);
@@ -666,19 +671,11 @@ int main(void)
     max31865_init();
     max31865_spi_uninit();
 
-    float px = 0;
     // Enter main loop.
     for (;;)
     {
-        px += 0.01;
-        if (px > 100) {
-            px = 0;
-        }
-
         p_lcd->lcd_hw_init();
 
-        lv_obj_set_pos(btn2, floor(px), 40);
-        lv_obj_set_pos(btn1, floor(100-px), 20);
         lv_tick_inc(1);
         lv_task_handler();
 
@@ -689,9 +686,8 @@ int main(void)
             char buffer[64];
             APP_ERROR_CHECK(max31865_spi_init());
             float temp = max31865_temperature(PT100_RNOMINAL, PT100_RREF);
-            sprintf(buffer, "Temp: %.1f", temp);
-            NRF_LOG_INFO("%s", buffer);
-            lv_label_set_text(label, buffer);
+            sprintf(buffer, "%.1f C", temp);
+            lv_label_set_text(fire_temp_label, buffer);
             max31865_spi_uninit();
             should_read_temp = false;
         }

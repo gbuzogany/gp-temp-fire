@@ -51,6 +51,7 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_rtc.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
   $(PROJ_DIR)/../main.c \
+  $(PROJ_DIR)/../fire.c \
   $(PROJ_DIR)/../st7735/st7735.c \
   $(PROJ_DIR)/../max31865/max31865.c \
   $(PROJ_DIR)/../lvgl/src/./lv_core/lv_obj.c \
@@ -87,11 +88,13 @@ SRC_FILES += \
   $(PROJ_DIR)/../lvgl/src/./lv_font/lv_font.c \
   $(PROJ_DIR)/../lvgl/src/./lv_font/lv_font_fmt_txt.c \
   $(PROJ_DIR)/../lvgl/src/./lv_font/lv_font_montserrat_14.c \
+  $(PROJ_DIR)/../lvgl/src/./lv_font/lv_font_montserrat_36.c \
   $(PROJ_DIR)/../lvgl/src/./lv_themes/lv_theme.c \
   $(PROJ_DIR)/../lvgl/src/./lv_themes/lv_theme_material.c \
   $(PROJ_DIR)/../lvgl/src/./lv_widgets/lv_label.c \
   $(PROJ_DIR)/../lvgl/src/./lv_widgets/lv_btn.c \
   $(PROJ_DIR)/../lvgl/src/./lv_widgets/lv_cont.c \
+  $(PROJ_DIR)/../lvgl/src/./lv_widgets/lv_img.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
 	$(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
 	$(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
