@@ -23,6 +23,8 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+#include "nrf_drv_timer.h"
+
 #include "lvgl/lvgl.h"
 #include "nrf_gfx.h"
 #include "nrf_delay.h"
@@ -31,6 +33,7 @@
 extern const nrf_lcd_t nrf_lcd_st7735;
 static const nrf_lcd_t * p_lcd = &nrf_lcd_st7735;
 
+const nrf_drv_timer_t TEMP_TIMER = NRF_DRV_TIMER_INSTANCE(2);
 
 // lvgl
 

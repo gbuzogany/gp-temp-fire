@@ -375,7 +375,7 @@ static ret_code_t st7735_init(void)
 
 static void st7735_uninit(void)
 {
-    // nrf_drv_spi_uninit(&spi);
+    nrfx_spim_uninit(&spi);
 }
 
 static void st7735_pixel_set(uint16_t x, uint16_t y)
