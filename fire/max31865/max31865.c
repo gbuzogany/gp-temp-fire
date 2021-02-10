@@ -1,4 +1,5 @@
 #include "sdk_common.h"
+
 #include "nrf_drv_spi.h"
 #include "nrfx_spim.h"
 #include "nrf_delay.h"
@@ -40,7 +41,7 @@
 #define RTD_B -5.775e-7
 
 static volatile bool spi_xfer_done = false;
-extern const nrfx_spim_t spi;
+static const nrfx_spim_t spi = NRFX_SPIM_INSTANCE(MAX31865_SPI_INSTANCE);
 
 static void spim_event_handler(nrfx_spim_evt_t const * p_event, void *p_context)
 {

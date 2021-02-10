@@ -3470,7 +3470,7 @@
  
 
 #ifndef NRFX_SPIM0_ENABLED
-#define NRFX_SPIM0_ENABLED 0
+#define NRFX_SPIM0_ENABLED 1
 #endif
 
 // <q> NRFX_SPIM1_ENABLED  - Enable SPIM1 instance
@@ -12232,6 +12232,10 @@
 
 #ifndef MAX31865_SCK_PIN
 #define MAX31865_SCK_PIN NRF_GPIO_PIN_MAP(0,8)
+#endif
+
+#ifndef MAX31865_SPI_INSTANCE
+#define MAX31865_SPI_INSTANCE 0
 #endif
 
 // <<< end of configuration section >>>

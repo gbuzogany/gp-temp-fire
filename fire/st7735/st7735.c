@@ -109,7 +109,7 @@
 #define RGB2BGR(x)      (x << 11) | (x & 0x07E0) | (x >> 11)
 #define SPIM_BUFFER_SIZE 128
 
-const nrfx_spim_t spi = NRFX_SPIM_INSTANCE(ST7735_SPI_INSTANCE);  /**< SPI instance. */
+static const nrfx_spim_t spi = NRFX_SPIM_INSTANCE(ST7735_SPI_INSTANCE);  /**< SPI instance. */
 static volatile bool spi_xfer_done;
 
 /**
