@@ -291,13 +291,15 @@ static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t l
 {
     if (led_state)
     {
-        nrf_gpio_pin_write(PIN_CAMERA, 1);
-        NRF_LOG_INFO("Received LED ON!");
+        lv_label_set_text(label, "ON");
+        // nrf_gpio_pin_write(PIN_CAMERA, 1);
+        // NRF_LOG_INFO("Received LED ON!");
     }
     else
     {
-        nrf_gpio_pin_write(PIN_CAMERA, 0);
-        NRF_LOG_INFO("Received LED OFF!");
+        lv_label_set_text(label, "OFF");
+        // nrf_gpio_pin_write(PIN_CAMERA, 0);
+        // NRF_LOG_INFO("Received LED OFF!");
     }
 }
 
