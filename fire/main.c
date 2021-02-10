@@ -45,8 +45,10 @@ const nrf_drv_timer_t TEMP_TIMER = NRF_DRV_TIMER_INSTANCE(2);
 lv_obj_t *fire_temp_label;
 lv_obj_t *garage_temp_label;
 lv_obj_t *fire_img;
+lv_obj_t *garage_img;
 
 LV_IMG_DECLARE(fire);
+LV_IMG_DECLARE(garage);
 
 static lv_disp_buf_t disp_buf;
 static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX / 10];                     /*Declare a buffer for 1/10 screen size*/
@@ -642,11 +644,15 @@ int main(void)
     lv_obj_set_pos(garage_temp_label, 0, 40);
     lv_obj_add_style(garage_temp_label, LV_LABEL_PART_MAIN, &bigStyle);
 
-    lv_obj_t * img1 = lv_img_create(screenMain, NULL);
-    lv_img_set_src(img1, &fire);
-    // lv_obj_set_size(img1, 160, 40);
-    lv_obj_align(img1, NULL, LV_ALIGN_CENTER, 0, -20);
-    lv_obj_set_pos(img1, 0, 0);
+    lv_obj_t *fire_img = lv_img_create(screenMain, NULL);
+    lv_img_set_src(fire_img, &fire);
+    lv_obj_align(fire_img, NULL, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_set_pos(fire_img, 4, 0);
+
+    lv_obj_t *garage_img = lv_img_create(screenMain, NULL);
+    lv_img_set_src(garage_img, &garage);
+    lv_obj_align(garage_img, NULL, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_set_pos(garage_img, 0, 40);
 
     UNUSED_VARIABLE(event_handler_btn);
 
@@ -686,7 +692,7 @@ int main(void)
             char buffer[64];
             APP_ERROR_CHECK(max31865_spi_init());
             float temp = max31865_temperature(PT100_RNOMINAL, PT100_RREF);
-            sprintf(buffer, "%.1f C", temp);
+            sprintf(buffer, "%.1f", temp);
             lv_label_set_text(fire_temp_label, buffer);
             max31865_spi_uninit();
             should_read_temp = false;

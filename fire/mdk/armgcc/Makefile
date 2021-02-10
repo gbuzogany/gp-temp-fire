@@ -52,6 +52,7 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
   $(PROJ_DIR)/../main.c \
   $(PROJ_DIR)/../fire.c \
+  $(PROJ_DIR)/../garage.c \
   $(PROJ_DIR)/../st7735/st7735.c \
   $(PROJ_DIR)/../max31865/max31865.c \
   $(PROJ_DIR)/../lvgl/src/./lv_core/lv_obj.c \
