@@ -37,6 +37,9 @@ static const nrf_lcd_t * p_lcd = &nrf_lcd_st7735;
 
 const nrf_drv_timer_t TEMP_TIMER = NRF_DRV_TIMER_INSTANCE(2);
 
+#define PT100_RREF      430.0
+#define PT100_RNOMINAL  100.0
+
 // lvgl
 
 lv_obj_t *label;
@@ -92,8 +95,6 @@ static void gfx_initialization(void)
 {
     APP_ERROR_CHECK(nrf_gfx_init(p_lcd));
 }
-
-#define PIN_CAMERA NRF_GPIO_PIN_MAP(0,14)
 
 #define ADVERTISING_LED                 BSP_BOARD_LED_0                         /**< Is on when device is advertising. */
 #define CONNECTED_LED                   BSP_BOARD_LED_1                         /**< Is on when device has connected. */
@@ -601,56 +602,61 @@ int main(void)
     // Initialize.
     log_init();
     timer_init();
-    nrf_gpio_cfg_output(PIN_CAMERA);
     leds_init();
     timers_init();
     buttons_init();
     power_management_init();
 
-    gfx_initialization();
-    nrf_delay_ms(10);
-    nrf_gfx_rotation_set(p_lcd, NRF_LCD_ROTATE_270);
+    // gfx_initialization();
+    // nrf_delay_ms(10);
+    // nrf_gfx_rotation_set(p_lcd, NRF_LCD_ROTATE_270);
 
-    lv_init();
+    // lv_init();
 
-    lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 10);    /*Initialize the display buffer*/
+    // lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 10);    /*Initialize the display buffer*/
 
-    lv_disp_drv_init(&disp_drv);          /*Basic initialization*/
-    disp_drv.flush_cb = my_disp_flush;    /*Set your driver function*/
-    disp_drv.buffer = &disp_buf;          /*Assign the buffer to the display*/
-    lv_disp_drv_register(&disp_drv);      /*Finally register the driver*/
+    // lv_disp_drv_init(&disp_drv);          /*Basic initialization*/
+    // disp_drv.flush_cb = my_disp_flush;    /*Set your driver function*/
+    // disp_drv.buffer = &disp_buf;          /*Assign the buffer to the display*/
+    // lv_disp_drv_register(&disp_drv);      /*Finally register the driver*/
 
-    lv_indev_drv_init(&indev_drv);             /*Basic initialization*/
-    indev_drv.type = LV_INDEV_TYPE_POINTER;    /*Touch pad is a pointer-like device*/
-    indev_drv.read_cb = my_touchpad_read;      /*Set your driver function*/
-    lv_indev_drv_register(&indev_drv);         /*Finally register the driver*/
+    // lv_indev_drv_init(&indev_drv);             /*Basic initialization*/
+    // indev_drv.type = LV_INDEV_TYPE_POINTER;    /*Touch pad is a pointer-like device*/
+    // indev_drv.read_cb = my_touchpad_read;      /*Set your driver function*/
+    // lv_indev_drv_register(&indev_drv);         /*Finally register the driver*/
 
-    lv_obj_t *screenMain = lv_obj_create(NULL, NULL);
-    label = lv_label_create(screenMain, NULL);
-    lv_label_set_long_mode(label, LV_LABEL_LONG_BREAK);
-    lv_label_set_text(label, "Press a button");
-    lv_label_set_align(label, LV_LABEL_ALIGN_LEFT);
-    lv_obj_set_size(label, 160, 40);
-    lv_obj_set_pos(label, 10, 0);
+    // lv_obj_t *screenMain = lv_obj_create(NULL, NULL);
+    // label = lv_label_create(screenMain, NULL);
+    // lv_label_set_long_mode(label, LV_LABEL_LONG_BREAK);
+    // lv_label_set_text(label, "Press a button");
+    // lv_label_set_align(label, LV_LABEL_ALIGN_LEFT);
+    // lv_obj_set_size(label, 160, 40);
+    // lv_obj_set_pos(label, 10, 0);
 
+    // UNUSED_VARIABLE(event_handler_btn);
+
+    // btn1 = lv_btn_create(screenMain, NULL);
+    // lv_obj_set_event_cb(btn1, event_handler_btn);
+    // lv_obj_set_width(btn1, 70);
+    // lv_obj_set_height(btn1, 32);
+    // lv_obj_set_pos(btn1, 10, 40);
+
+    // btn2 = lv_btn_create(screenMain, NULL);
+    // lv_obj_set_event_cb(btn2, event_handler_btn);
+    // lv_obj_set_width(btn2, 70);
+    // lv_obj_set_height(btn2, 32);
+    // lv_obj_set_pos(btn2, 100, 40);
+
+    // lv_anim_t a;
+    // lv_anim_init(&a);
+
+    // lv_scr_load(screenMain);
+    // p_lcd->lcd_uninit();
+
+    UNUSED_VARIABLE(gfx_initialization);
     UNUSED_VARIABLE(event_handler_btn);
-
-    btn1 = lv_btn_create(screenMain, NULL);
-    lv_obj_set_event_cb(btn1, event_handler_btn);
-    lv_obj_set_width(btn1, 70);
-    lv_obj_set_height(btn1, 32);
-    lv_obj_set_pos(btn1, 10, 40);
-
-    btn2 = lv_btn_create(screenMain, NULL);
-    lv_obj_set_event_cb(btn2, event_handler_btn);
-    lv_obj_set_width(btn2, 70);
-    lv_obj_set_height(btn2, 32);
-    lv_obj_set_pos(btn2, 100, 40);
-
-    lv_anim_t a;
-    lv_anim_init(&a);
-
-    lv_scr_load(screenMain);
+    UNUSED_VARIABLE(buf);
+    UNUSED_VARIABLE(disp_buf);
 
     ble_stack_init();
     gap_params_init();
@@ -663,6 +669,10 @@ int main(void)
     NRF_LOG_INFO("GP-Temp-Fire started.");
     advertising_start();
 
+    APP_ERROR_CHECK(max31865_spi_init());
+    max31865_init();
+    max31865_spi_uninit();
+
     float px = 0;
     // Enter main loop.
     for (;;)
@@ -672,24 +682,27 @@ int main(void)
             px = 0;
         }
 
-        p_lcd->lcd_hw_init();
+        // p_lcd->lcd_hw_init();
 
-        lv_obj_set_pos(btn2, floor(px), 40);
-        lv_obj_set_pos(btn1, floor(100-px), 20);
-        lv_tick_inc(1);
-        // nrf_delay_ms(1);
-        lv_task_handler();
+        // lv_obj_set_pos(btn2, floor(px), 40);
+        // lv_obj_set_pos(btn1, floor(100-px), 20);
+        // lv_tick_inc(1);
+        // // nrf_delay_ms(1);
+        // lv_task_handler();
 
         idle_state_handle();
-        p_lcd->lcd_uninit();
+        // p_lcd->lcd_uninit();
 
         if (should_read_temp) {
-            char buffer[32];
+            char buffer[64];
             sprintf(buffer, "%d", _count);
-            lv_label_set_text(label, buffer);
+            // lv_label_set_text(label, buffer);
 
-            max31865_init();
-            max31865_uninit();
+            APP_ERROR_CHECK(max31865_spi_init());
+            float temp = max31865_temperature(PT100_RNOMINAL, PT100_RREF);
+            sprintf(buffer, "Temp: %f", temp);
+            NRF_LOG_INFO("%s", buffer);
+            max31865_spi_uninit();
             should_read_temp = false;
         }
     }
