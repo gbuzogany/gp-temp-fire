@@ -109,7 +109,7 @@
 #define RGB2BGR(x)      (x << 11) | (x & 0x07E0) | (x >> 11)
 #define SPIM_BUFFER_SIZE 128
 
-static const nrfx_spim_t spi = NRFX_SPIM_INSTANCE(ST7735_SPI_INSTANCE);  /**< SPI instance. */
+const nrfx_spim_t spi = NRFX_SPIM_INSTANCE(ST7735_SPI_INSTANCE);  /**< SPI instance. */
 static volatile bool spi_xfer_done;
 
 /**
@@ -132,11 +132,10 @@ typedef enum{
 
 static st7735_t m_st7735;
 
-void spim_event_handler(nrfx_spim_evt_t const * p_event, void *p_context)
+static void spim_event_handler(nrfx_spim_evt_t const * p_event, void *p_context)
 {
     spi_xfer_done = true;
 }
-
 
 static inline void write_command(const void * data, size_t command_size, size_t total_size)
 {
@@ -335,24 +334,6 @@ static ret_code_t hardware_init(void)
 
     err_code = nrfx_spim_init(&spi, &spi_config, spim_event_handler, NULL);
 
-    // set SCK to high drive
-    nrf_gpio_cfg(
-            ST7735_SCK_PIN,
-            NRF_GPIO_PIN_DIR_OUTPUT,
-            NRF_GPIO_PIN_INPUT_DISCONNECT,
-            NRF_GPIO_PIN_NOPULL,
-            NRF_GPIO_PIN_H0H1,
-            NRF_GPIO_PIN_NOSENSE);
-
-    // set MOSI to high drive
-    nrf_gpio_cfg(
-            ST7735_MOSI_PIN,
-            NRF_GPIO_PIN_DIR_OUTPUT,
-            NRF_GPIO_PIN_INPUT_DISCONNECT,
-            NRF_GPIO_PIN_NOPULL,
-            NRF_GPIO_PIN_H0H1,
-            NRF_GPIO_PIN_NOSENSE);
-
     return err_code;
 }
 
@@ -502,6 +483,7 @@ static lcd_cb_t st7735_cb = {
 
 const nrf_lcd_t nrf_lcd_st7735 = {
     .lcd_init = st7735_init,
+    .lcd_hw_init = hardware_init,
     .lcd_uninit = st7735_uninit,
     .lcd_pixel_draw = st7735_pixel_draw,
     .lcd_screen_flush = st7735_screen_flush,

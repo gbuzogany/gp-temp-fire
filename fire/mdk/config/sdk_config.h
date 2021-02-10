@@ -12216,7 +12216,23 @@
 #define ST7735_WIDTH 80
 #endif
 
+// MAX31865
 
+#ifndef MAX31865_SS_PIN
+#define MAX31865_SS_PIN NRF_GPIO_PIN_MAP(0,27)
+#endif
+
+#ifndef MAX31865_MISO_PIN
+#define MAX31865_MISO_PIN NRF_GPIO_PIN_MAP(1,8)
+#endif
+
+#ifndef MAX31865_MOSI_PIN
+#define MAX31865_MOSI_PIN NRF_GPIO_PIN_MAP(0,6)
+#endif
+
+#ifndef MAX31865_SCK_PIN
+#define MAX31865_SCK_PIN NRF_GPIO_PIN_MAP(0,8)
+#endif
 
 // <<< end of configuration section >>>
 #endif //SDK_CONFIG_H

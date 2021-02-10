@@ -162,7 +162,6 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-
 /**@brief Function for the LEDs initialization.
  *
  * @details Initializes all LEDs used by the application.
@@ -171,7 +170,6 @@ static void leds_init(void)
 {
     bsp_board_init(BSP_INIT_LEDS);
 }
-
 
 /**@brief Function for the Timer initialization.
  *
@@ -183,7 +181,6 @@ static void timers_init(void)
     ret_code_t err_code = app_timer_init();
     APP_ERROR_CHECK(err_code);
 }
-
 
 /**@brief Function for the GAP initialization.
  *
@@ -214,7 +211,6 @@ static void gap_params_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
 /**@brief Function for initializing the GATT module.
  */
 static void gatt_init(void)
@@ -222,7 +218,6 @@ static void gatt_init(void)
     ret_code_t err_code = nrf_ble_gatt_init(&m_gatt, NULL);
     APP_ERROR_CHECK(err_code);
 }
-
 
 /**@brief Function for initializing the Advertising functionality.
  *
@@ -271,7 +266,6 @@ static void advertising_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
 /**@brief Function for handling Queued Write Module errors.
  *
  * @details A pointer to this function will be passed to each service which may need to inform the
@@ -283,7 +277,6 @@ static void nrf_qwr_error_handler(uint32_t nrf_error)
 {
     APP_ERROR_HANDLER(nrf_error);
 }
-
 
 /**@brief Function for handling write events to the LED characteristic.
  *
@@ -306,7 +299,6 @@ static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t l
     }
 }
 
-
 /**@brief Function for initializing services that will be used by the application.
  */
 static void services_init(void)
@@ -327,7 +319,6 @@ static void services_init(void)
     err_code = ble_lbs_init(&m_lbs, &init);
     APP_ERROR_CHECK(err_code);
 }
-
 
 /**@brief Function for handling the Connection Parameters Module.
  *
@@ -351,7 +342,6 @@ static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
     }
 }
 
-
 /**@brief Function for handling a Connection Parameters error.
  *
  * @param[in] nrf_error  Error code containing information about what went wrong.
@@ -360,7 +350,6 @@ static void conn_params_error_handler(uint32_t nrf_error)
 {
     APP_ERROR_HANDLER(nrf_error);
 }
-
 
 /**@brief Function for initializing the Connection Parameters module.
  */
@@ -384,7 +373,6 @@ static void conn_params_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
 /**@brief Function for starting advertising.
  */
 static void advertising_start(void)
@@ -396,7 +384,6 @@ static void advertising_start(void)
 
     bsp_board_led_on(ADVERTISING_LED);
 }
-
 
 /**@brief Function for handling BLE events.
  *
@@ -478,7 +465,6 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     }
 }
 
-
 /**@brief Function for initializing the BLE stack.
  *
  * @details Initializes the SoftDevice and the BLE event interrupt.
@@ -503,7 +489,6 @@ static void ble_stack_init(void)
     // Register a handler for BLE events.
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
 }
-
 
 /**@brief Function for handling events from the button handler module.
  *
@@ -534,7 +519,6 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
     }
 }
 
-
 /**@brief Function for initializing the button handler module.
  */
 static void buttons_init(void)
@@ -552,7 +536,6 @@ static void buttons_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
 static void log_init(void)
 {
     ret_code_t err_code = NRF_LOG_INIT(NULL);
@@ -560,7 +543,6 @@ static void log_init(void)
 
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
-
 
 /**@brief Function for initializing power management.
  */
@@ -570,7 +552,6 @@ static void power_management_init(void)
     err_code = nrf_pwr_mgmt_init();
     APP_ERROR_CHECK(err_code);
 }
-
 
 /**@brief Function for handling the idle state (main loop).
  *
@@ -585,10 +566,8 @@ static void idle_state_handle(void)
     // }
 }
 
-
 /**@brief Function for application main entry.
  */
-
 
 int main(void)
 {
@@ -665,6 +644,8 @@ int main(void)
             px = 0;
         }
 
+        p_lcd->lcd_hw_init();
+
         lv_obj_set_pos(btn2, floor(px), 40);
         lv_obj_set_pos(btn1, floor(100-px), 20);
         lv_tick_inc(1);
@@ -672,6 +653,7 @@ int main(void)
         lv_task_handler();
 
         idle_state_handle();
+        p_lcd->lcd_uninit();
     }
 }
 
