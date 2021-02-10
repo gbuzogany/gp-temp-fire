@@ -33,3 +33,7 @@ ret_code_t max31865_init(void)
 
     return err_code;
 }
+
+void max31865_uninit(void) {
+    nrfx_spim_uninit(&spi);
+}

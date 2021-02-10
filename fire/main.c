@@ -25,6 +25,8 @@
 
 #include "nrf_drv_timer.h"
 
+#include "max31865/max31865.h"
+
 #include "lvgl/lvgl.h"
 #include "nrf_gfx.h"
 #include "nrf_delay.h"
@@ -41,6 +43,7 @@ lv_obj_t *label;
 lv_obj_t *btn1;
 lv_obj_t *btn2;
 
+static int _count = 0;
 static lv_disp_buf_t disp_buf;
 static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX / 10];                     /*Declare a buffer for 1/10 screen size*/
 
@@ -566,6 +569,30 @@ static void idle_state_handle(void)
     // }
 }
 
+static bool should_read_temp = false;
+
+void timer_handler(nrf_timer_event_t event_type, void * p_context)
+{
+    _count++;
+    should_read_temp = true;
+}
+
+void timer_init() {
+    uint32_t time_ms = 1000; 
+    uint32_t time_ticks;
+    uint32_t err_code;
+
+    nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
+    err_code = nrf_drv_timer_init(&TEMP_TIMER, &timer_cfg, timer_handler);
+    APP_ERROR_CHECK(err_code);
+
+    time_ticks = nrf_drv_timer_ms_to_ticks(&TEMP_TIMER, time_ms);
+    nrf_drv_timer_extended_compare(
+         &TEMP_TIMER, NRF_TIMER_CC_CHANNEL0, time_ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
+
+    nrf_drv_timer_enable(&TEMP_TIMER);
+}
+
 /**@brief Function for application main entry.
  */
 
@@ -573,6 +600,7 @@ int main(void)
 {
     // Initialize.
     log_init();
+    timer_init();
     nrf_gpio_cfg_output(PIN_CAMERA);
     leds_init();
     timers_init();
@@ -654,6 +682,16 @@ int main(void)
 
         idle_state_handle();
         p_lcd->lcd_uninit();
+
+        if (should_read_temp) {
+            char buffer[32];
+            sprintf(buffer, "%d", _count);
+            lv_label_set_text(label, buffer);
+
+            max31865_init();
+            max31865_uninit();
+            should_read_temp = false;
+        }
     }
 }
 
