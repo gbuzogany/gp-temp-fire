@@ -4,7 +4,7 @@ OUTPUT_DIRECTORY := _build
 
 MDK_ROOT := ../../../../..
 SDK_ROOT := $(MDK_ROOT)/nrf_sdks/nRF5_SDK_17.0.2_d674dde
-PROJ_DIR := ..
+PROJ_DIR := ../..
 
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
   LINKER_SCRIPT  := rtc_gcc_nrf52.ld
@@ -50,52 +50,53 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_rtc.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
-  $(PROJ_DIR)/../main.c \
-  $(PROJ_DIR)/../fire.c \
-  $(PROJ_DIR)/../garage.c \
-  $(PROJ_DIR)/../st7735/st7735.c \
-  $(PROJ_DIR)/../max31865/max31865.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_core/lv_obj.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_core/lv_refr.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_core/lv_style.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_core/lv_group.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_core/lv_indev.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_core/lv_disp.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_hal/lv_hal_tick.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_hal/lv_hal_disp.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_hal/lv_hal_indev.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_draw/lv_img_decoder.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_draw/lv_img_cache.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_draw/lv_img_buf.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_draw/lv_draw_img.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_draw/lv_draw_rect.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_draw/lv_draw_mask.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_draw/lv_draw_blend.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_draw/lv_draw_label.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_draw/lv_draw_line.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_task.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_mem.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_fs.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_anim.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_ll.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_task.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_debug.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_color.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_gc.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_area.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_utils.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_txt.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_misc/lv_math.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_font/lv_font.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_font/lv_font_fmt_txt.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_font/lv_font_montserrat_14.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_font/lv_font_montserrat_36.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_themes/lv_theme.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_themes/lv_theme_material.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_widgets/lv_label.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_widgets/lv_btn.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_widgets/lv_cont.c \
-  $(PROJ_DIR)/../lvgl/src/./lv_widgets/lv_img.c \
+  $(PROJ_DIR)/main.c \
+  $(PROJ_DIR)/fire.c \
+  $(PROJ_DIR)/ble_temp.c \
+  $(PROJ_DIR)/garage.c \
+  $(PROJ_DIR)/st7735/st7735.c \
+  $(PROJ_DIR)/max31865/max31865.c \
+  $(PROJ_DIR)/lvgl/src/./lv_core/lv_obj.c \
+  $(PROJ_DIR)/lvgl/src/./lv_core/lv_refr.c \
+  $(PROJ_DIR)/lvgl/src/./lv_core/lv_style.c \
+  $(PROJ_DIR)/lvgl/src/./lv_core/lv_group.c \
+  $(PROJ_DIR)/lvgl/src/./lv_core/lv_indev.c \
+  $(PROJ_DIR)/lvgl/src/./lv_core/lv_disp.c \
+  $(PROJ_DIR)/lvgl/src/./lv_hal/lv_hal_tick.c \
+  $(PROJ_DIR)/lvgl/src/./lv_hal/lv_hal_disp.c \
+  $(PROJ_DIR)/lvgl/src/./lv_hal/lv_hal_indev.c \
+  $(PROJ_DIR)/lvgl/src/./lv_draw/lv_img_decoder.c \
+  $(PROJ_DIR)/lvgl/src/./lv_draw/lv_img_cache.c \
+  $(PROJ_DIR)/lvgl/src/./lv_draw/lv_img_buf.c \
+  $(PROJ_DIR)/lvgl/src/./lv_draw/lv_draw_img.c \
+  $(PROJ_DIR)/lvgl/src/./lv_draw/lv_draw_rect.c \
+  $(PROJ_DIR)/lvgl/src/./lv_draw/lv_draw_mask.c \
+  $(PROJ_DIR)/lvgl/src/./lv_draw/lv_draw_blend.c \
+  $(PROJ_DIR)/lvgl/src/./lv_draw/lv_draw_label.c \
+  $(PROJ_DIR)/lvgl/src/./lv_draw/lv_draw_line.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_task.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_mem.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_fs.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_anim.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_ll.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_task.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_debug.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_color.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_gc.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_area.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_utils.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_txt.c \
+  $(PROJ_DIR)/lvgl/src/./lv_misc/lv_math.c \
+  $(PROJ_DIR)/lvgl/src/./lv_font/lv_font.c \
+  $(PROJ_DIR)/lvgl/src/./lv_font/lv_font_fmt_txt.c \
+  $(PROJ_DIR)/lvgl/src/./lv_font/lv_font_montserrat_14.c \
+  $(PROJ_DIR)/lvgl/src/./lv_font/lv_font_montserrat_36.c \
+  $(PROJ_DIR)/lvgl/src/./lv_themes/lv_theme.c \
+  $(PROJ_DIR)/lvgl/src/./lv_themes/lv_theme_material.c \
+  $(PROJ_DIR)/lvgl/src/./lv_widgets/lv_label.c \
+  $(PROJ_DIR)/lvgl/src/./lv_widgets/lv_btn.c \
+  $(PROJ_DIR)/lvgl/src/./lv_widgets/lv_cont.c \
+  $(PROJ_DIR)/lvgl/src/./lv_widgets/lv_img.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
 	$(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
 	$(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \

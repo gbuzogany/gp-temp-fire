@@ -7,5 +7,9 @@
 			"path": "../../nrf_sdks/nRF5_SDK_17.0.2_d674dde"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"nrf_log_default_backends.h": "c"
+		}
+	}
 }

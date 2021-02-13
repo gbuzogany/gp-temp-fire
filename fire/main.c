@@ -31,6 +31,7 @@
 #include "nrf_gfx.h"
 #include "nrf_delay.h"
 #include <math.h>
+#include "ble_temp.h"
 
 extern const nrf_lcd_t nrf_lcd_st7735;
 static const nrf_lcd_t * p_lcd = &nrf_lcd_st7735;
@@ -122,8 +123,12 @@ static void gfx_initialization(void)
 
 #define DEAD_BEEF                       0xDEADBEEF                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
+static ble_uuid_t m_adv_uuids[] =                                               /**< Universally unique service identifiers. */
+{
+    {TEMP_SERVICE_UUID, BLE_UUID_TYPE_VENDOR_BEGIN }
+};
 
-BLE_LBS_DEF(m_lbs);                                                             /**< LED Button Service instance. */
+BLE_TEMP_DEF(m_temp);
 NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                                         /**< Context for the Queued Write module.*/
 
@@ -233,8 +238,6 @@ static void advertising_init(void)
     ble_advdata_t advdata;
     ble_advdata_t srdata;
 
-    ble_uuid_t adv_uuids[] = {{LBS_UUID_SERVICE, m_lbs.uuid_type}};
-
     // Build and set advertising data.
     memset(&advdata, 0, sizeof(advdata));
 
@@ -242,10 +245,9 @@ static void advertising_init(void)
     advdata.include_appearance = true;
     advdata.flags              = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
-
     memset(&srdata, 0, sizeof(srdata));
-    srdata.uuids_complete.uuid_cnt = sizeof(adv_uuids) / sizeof(adv_uuids[0]);
-    srdata.uuids_complete.p_uuids  = adv_uuids;
+    srdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
+    srdata.uuids_complete.p_uuids  = m_adv_uuids;
 
     err_code = ble_advdata_encode(&advdata, m_adv_data.adv_data.p_data, &m_adv_data.adv_data.len);
     APP_ERROR_CHECK(err_code);
@@ -281,24 +283,35 @@ static void nrf_qwr_error_handler(uint32_t nrf_error)
     APP_ERROR_HANDLER(nrf_error);
 }
 
-/**@brief Function for handling write events to the LED characteristic.
+/**@brief Function for handling the Custom Service Service events.
  *
- * @param[in] p_lbs     Instance of LED Button Service to which the write applies.
- * @param[in] led_state Written/desired state of the LED.
+ * @details This function will be called for all Custom Service events which are passed to
+ *          the application.
+ *
+ * @param[in]   p_temp_service  Custom Service structure.
+ * @param[in]   p_evt          Event received from the Custom Service.
+ *
  */
-static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t led_state)
+static void on_temp_evt(ble_temp_t     * p_temp_service,
+                       ble_temp_evt_t * p_evt)
 {
-    if (led_state)
+    switch(p_evt->evt_type)
     {
-        // lv_label_set_text(label, "ON");
-        // nrf_gpio_pin_write(PIN_CAMERA, 1);
-        // NRF_LOG_INFO("Received LED ON!");
-    }
-    else
-    {
-        // lv_label_set_text(label, "OFF");
-        // nrf_gpio_pin_write(PIN_CAMERA, 0);
-        // NRF_LOG_INFO("Received LED OFF!");
+        case BLE_TEMP_EVT_NOTIFICATION_ENABLED:
+             break;
+
+        case BLE_TEMP_EVT_NOTIFICATION_DISABLED:
+            break;
+
+        case BLE_TEMP_EVT_CONNECTED:
+            break;
+
+        case BLE_TEMP_EVT_DISCONNECTED:
+              break;
+
+        default:
+              // No implementation needed.
+              break;
     }
 }
 
@@ -307,8 +320,8 @@ static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t l
 static void services_init(void)
 {
     ret_code_t         err_code;
-    ble_lbs_init_t     init     = {0};
     nrf_ble_qwr_init_t qwr_init = {0};
+    ble_temp_init_t    temp_init = {0};
 
     // Initialize Queued Write Module.
     qwr_init.error_handler = nrf_qwr_error_handler;
@@ -316,10 +329,17 @@ static void services_init(void)
     err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
     APP_ERROR_CHECK(err_code);
 
-    // Initialize LBS.
-    init.led_write_handler = led_write_handler;
+    temp_init.evt_handler  = on_temp_evt;
 
-    err_code = ble_lbs_init(&m_lbs, &init);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&temp_init.fire_md.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&temp_init.fire_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&temp_init.fire_md.write_perm);
+
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&temp_init.garage_md.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&temp_init.garage_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&temp_init.garage_md.write_perm);
+
+    err_code = ble_temp_init(&m_temp, &temp_init);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -500,22 +520,8 @@ static void ble_stack_init(void)
  */
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
-    ret_code_t err_code;
-
     switch (pin_no)
     {
-        case LEDBUTTON_BUTTON:
-            NRF_LOG_INFO("Send button state change.");
-            err_code = ble_lbs_on_button_change(m_conn_handle, &m_lbs, button_action);
-            if (err_code != NRF_SUCCESS &&
-                err_code != BLE_ERROR_INVALID_CONN_HANDLE &&
-                err_code != NRF_ERROR_INVALID_STATE &&
-                err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
-            {
-                APP_ERROR_CHECK(err_code);
-            }
-            break;
-
         default:
             APP_ERROR_HANDLER(pin_no);
             break;
@@ -692,9 +698,17 @@ int main(void)
             char buffer[64];
             APP_ERROR_CHECK(max31865_spi_init());
             float temp = max31865_temperature(PT100_RNOMINAL, PT100_RREF);
+            max31865_spi_uninit();
             sprintf(buffer, "%.1f", temp);
             lv_label_set_text(fire_temp_label, buffer);
-            max31865_spi_uninit();
+            int16_t temp_i = temp * 100.0f;
+            ble_temp_fire_update(&m_temp, temp_i);
+            uint32_t err_code = ble_temp_garage_get(&m_temp, &temp_i);
+            if (err_code == NRF_SUCCESS) {
+                temp = temp_i / 100.0f;
+                sprintf(buffer, "%.1f", temp);
+                lv_label_set_text(garage_temp_label, buffer);
+            }
             should_read_temp = false;
         }
     }
