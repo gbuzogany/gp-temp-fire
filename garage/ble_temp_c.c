@@ -102,9 +102,6 @@ static void on_hvx(ble_temp_c_t * p_ble_temp_c, const ble_evt_t * p_ble_evt)
         ble_temp_c_evt.conn_handle                 = p_ble_temp_c->conn_handle;
 
         uint8_t *temp = (uint8_t *) &ble_temp_c_evt.params.value_fire;
-        
-        NRF_LOG_HEXDUMP_INFO(p_ble_evt->evt.gattc_evt.params.hvx.data, p_ble_evt->evt.gattc_evt.params.hvx.len);
-
         if (p_ble_evt->evt.gattc_evt.params.hvx.len == 2) {
             temp[0] = p_ble_evt->evt.gattc_evt.params.hvx.data[1];
             temp[1] = p_ble_evt->evt.gattc_evt.params.hvx.data[0];

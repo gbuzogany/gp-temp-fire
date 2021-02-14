@@ -544,18 +544,6 @@ static void temp_c_evt_handler(ble_temp_c_t * p_temp_c, ble_temp_c_evt_t * p_tem
             sprintf(buffer, "Temp = %f", temp);
 
             NRF_LOG_INFO("%s", buffer);
-            NRF_LOG_HEXDUMP_INFO(&p_temp_c_evt->params.value_fire, 2);
-
-            // if (p_temp_c_evt->params.hrm.rr_intervals_cnt != 0)
-            // {
-            //     uint32_t rr_avg = 0;
-            //     for (uint32_t i = 0; i < p_temp_c_evt->params.hrm.rr_intervals_cnt; i++)
-            //     {
-            //         rr_avg += p_temp_c_evt->params.hrm.rr_intervals[i];
-            //     }
-            //     rr_avg = rr_avg / p_temp_c_evt->params.hrm.rr_intervals_cnt;
-            //     NRF_LOG_INFO("rr_interval (avg) = %d.", rr_avg);
-            // }
         } break;
 
         default:
