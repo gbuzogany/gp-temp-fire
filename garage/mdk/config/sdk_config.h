@@ -46,6 +46,22 @@
 #ifdef USE_APP_CONFIG
 #include "app_config.h"
 #endif
+// <h> Application 
+
+//==========================================================
+// <o> APP_SHUTDOWN_HANDLER_PRIORITY - Application shutdown observer priority. 
+#ifndef APP_SHUTDOWN_HANDLER_PRIORITY
+#define APP_SHUTDOWN_HANDLER_PRIORITY 1
+#endif
+
+// <o> NRF_BLE_GQ_QUEUE_SIZE - Queue size for BLE GATT Queue module. 
+#ifndef NRF_BLE_GQ_QUEUE_SIZE
+#define NRF_BLE_GQ_QUEUE_SIZE 8
+#endif
+
+// </h> 
+//==========================================================
+
 // <h> Board Support 
 
 //==========================================================
@@ -53,7 +69,7 @@
  
 
 #ifndef BSP_BTN_BLE_ENABLED
-#define BSP_BTN_BLE_ENABLED 0
+#define BSP_BTN_BLE_ENABLED 1
 #endif
 
 // </h> 
@@ -66,15 +82,67 @@
  
 
 #ifndef BLE_ADVERTISING_ENABLED
-#define BLE_ADVERTISING_ENABLED 1
+#define BLE_ADVERTISING_ENABLED 0
 #endif
 
-// <q> BLE_DTM_ENABLED  - ble_dtm - Module for testing RF/PHY using DTM commands
+// <q> BLE_DB_DISCOVERY_ENABLED  - ble_db_discovery - Database discovery module
  
 
+#ifndef BLE_DB_DISCOVERY_ENABLED
+#define BLE_DB_DISCOVERY_ENABLED 1
+#endif
+
+// <e> BLE_DTM_ENABLED - ble_dtm - Module for testing RF/PHY using DTM commands
+//==========================================================
 #ifndef BLE_DTM_ENABLED
 #define BLE_DTM_ENABLED 0
 #endif
+// <o> NRF_RADIO_ANTENNA_PIN_1 - Antenna 1 GPIO pin 
+#ifndef NRF_RADIO_ANTENNA_PIN_1
+#define NRF_RADIO_ANTENNA_PIN_1 21
+#endif
+
+// <o> NRF_RADIO_ANTENNA_PIN_2 - Antenna 2 GPIO pin 
+#ifndef NRF_RADIO_ANTENNA_PIN_2
+#define NRF_RADIO_ANTENNA_PIN_2 23
+#endif
+
+// <o> NRF_RADIO_ANTENNA_PIN_3 - Antenna 3 GPIO pin 
+#ifndef NRF_RADIO_ANTENNA_PIN_3
+#define NRF_RADIO_ANTENNA_PIN_3 26
+#endif
+
+// <o> NRF_RADIO_ANTENNA_PIN_4 - Antenna 4 GPIO pin 
+#ifndef NRF_RADIO_ANTENNA_PIN_4
+#define NRF_RADIO_ANTENNA_PIN_4 27
+#endif
+
+// <o> NRF_RADIO_ANTENNA_PIN_5 - Antenna 5 GPIO pin 
+#ifndef NRF_RADIO_ANTENNA_PIN_5
+#define NRF_RADIO_ANTENNA_PIN_5 28
+#endif
+
+// <o> NRF_RADIO_ANTENNA_PIN_6 - Antenna 6 GPIO pin 
+#ifndef NRF_RADIO_ANTENNA_PIN_6
+#define NRF_RADIO_ANTENNA_PIN_6 29
+#endif
+
+// <o> NRF_RADIO_ANTENNA_PIN_7 - Antenna 7 GPIO pin 
+#ifndef NRF_RADIO_ANTENNA_PIN_7
+#define NRF_RADIO_ANTENNA_PIN_7 30
+#endif
+
+// <o> NRF_RADIO_ANTENNA_PIN_8 - Antenna 8 GPIO pin 
+#ifndef NRF_RADIO_ANTENNA_PIN_8
+#define NRF_RADIO_ANTENNA_PIN_8 31
+#endif
+
+// <o> NRF_RADIO_ANTENNA_COUNT  
+#ifndef NRF_RADIO_ANTENNA_COUNT
+#define NRF_RADIO_ANTENNA_COUNT 12
+#endif
+
+// </e>
 
 // <q> BLE_RACP_ENABLED  - ble_racp - Record Access Control Point library
  
@@ -83,27 +151,6 @@
 #define BLE_RACP_ENABLED 0
 #endif
 
-// <e> NRF_BLE_CONN_PARAMS_ENABLED - ble_conn_params - Initiating and executing a connection parameters negotiation procedure
-//==========================================================
-#ifndef NRF_BLE_CONN_PARAMS_ENABLED
-#define NRF_BLE_CONN_PARAMS_ENABLED 1
-#endif
-// <o> NRF_BLE_CONN_PARAMS_MAX_SLAVE_LATENCY_DEVIATION - The largest acceptable deviation in slave latency. 
-// <i> The largest deviation (+ or -) from the requested slave latency that will not be renegotiated.
-
-#ifndef NRF_BLE_CONN_PARAMS_MAX_SLAVE_LATENCY_DEVIATION
-#define NRF_BLE_CONN_PARAMS_MAX_SLAVE_LATENCY_DEVIATION 499
-#endif
-
-// <o> NRF_BLE_CONN_PARAMS_MAX_SUPERVISION_TIMEOUT_DEVIATION - The largest acceptable deviation (in 10 ms units) in supervision timeout. 
-// <i> The largest deviation (+ or -, in 10 ms units) from the requested supervision timeout that will not be renegotiated.
-
-#ifndef NRF_BLE_CONN_PARAMS_MAX_SUPERVISION_TIMEOUT_DEVIATION
-#define NRF_BLE_CONN_PARAMS_MAX_SUPERVISION_TIMEOUT_DEVIATION 65535
-#endif
-
-// </e>
-
 // <q> NRF_BLE_GATT_ENABLED  - nrf_ble_gatt - GATT module
  
 
@@ -111,10 +158,44 @@
 #define NRF_BLE_GATT_ENABLED 1
 #endif
 
+// <e> NRF_BLE_GQ_ENABLED - nrf_ble_gq - BLE GATT Queue Module
+//==========================================================
+#ifndef NRF_BLE_GQ_ENABLED
+#define NRF_BLE_GQ_ENABLED 1
+#endif
+// <o> NRF_BLE_GQ_DATAPOOL_ELEMENT_SIZE - Default size of a single element in the pool of memory objects. 
+#ifndef NRF_BLE_GQ_DATAPOOL_ELEMENT_SIZE
+#define NRF_BLE_GQ_DATAPOOL_ELEMENT_SIZE 20
+#endif
+
+// <o> NRF_BLE_GQ_DATAPOOL_ELEMENT_COUNT - Default number of elements in the pool of memory objects. 
+#ifndef NRF_BLE_GQ_DATAPOOL_ELEMENT_COUNT
+#define NRF_BLE_GQ_DATAPOOL_ELEMENT_COUNT 8
+#endif
+
+// <o> NRF_BLE_GQ_GATTC_WRITE_MAX_DATA_LEN - Maximal size of the data inside GATTC write request (in bytes). 
+#ifndef NRF_BLE_GQ_GATTC_WRITE_MAX_DATA_LEN
+#define NRF_BLE_GQ_GATTC_WRITE_MAX_DATA_LEN 2
+#endif
+
+// <o> NRF_BLE_GQ_GATTS_HVX_MAX_DATA_LEN - Maximal size of the data inside GATTC notification or indication request (in bytes). 
+#ifndef NRF_BLE_GQ_GATTS_HVX_MAX_DATA_LEN
+#define NRF_BLE_GQ_GATTS_HVX_MAX_DATA_LEN 16
+#endif
+
+// </e>
+
+// <q> NRF_BLE_LESC_ENABLED  - nrf_ble_lesc - Le Secure Connection
+ 
+
+#ifndef NRF_BLE_LESC_ENABLED
+#define NRF_BLE_LESC_ENABLED 1
+#endif
+
 // <e> NRF_BLE_QWR_ENABLED - nrf_ble_qwr - Queued writes support module (prepare/execute write)
 //==========================================================
 #ifndef NRF_BLE_QWR_ENABLED
-#define NRF_BLE_QWR_ENABLED 1
+#define NRF_BLE_QWR_ENABLED 0
 #endif
 // <o> NRF_BLE_QWR_MAX_ATTR - Maximum number of attribute handles that can be registered. This number must be adjusted according to the number of attributes for which Queued Writes will be enabled. If it is zero, the module will reject all Queued Write requests. 
 #ifndef NRF_BLE_QWR_MAX_ATTR
@@ -123,10 +204,111 @@
 
 // </e>
 
+// <e> NRF_BLE_SCAN_ENABLED - nrf_ble_scan - Scanning Module
+//==========================================================
+#ifndef NRF_BLE_SCAN_ENABLED
+#define NRF_BLE_SCAN_ENABLED 1
+#endif
+// <o> NRF_BLE_SCAN_BUFFER - Data length for an advertising set. 
+#ifndef NRF_BLE_SCAN_BUFFER
+#define NRF_BLE_SCAN_BUFFER 31
+#endif
+
+// <o> NRF_BLE_SCAN_NAME_MAX_LEN - Maximum size for the name to search in the advertisement report. 
+#ifndef NRF_BLE_SCAN_NAME_MAX_LEN
+#define NRF_BLE_SCAN_NAME_MAX_LEN 32
+#endif
+
+// <o> NRF_BLE_SCAN_SHORT_NAME_MAX_LEN - Maximum size of the short name to search for in the advertisement report. 
+#ifndef NRF_BLE_SCAN_SHORT_NAME_MAX_LEN
+#define NRF_BLE_SCAN_SHORT_NAME_MAX_LEN 32
+#endif
+
+// <o> NRF_BLE_SCAN_SCAN_INTERVAL - Scanning interval. Determines the scan interval in units of 0.625 millisecond. 
+#ifndef NRF_BLE_SCAN_SCAN_INTERVAL
+#define NRF_BLE_SCAN_SCAN_INTERVAL 160
+#endif
+
+// <o> NRF_BLE_SCAN_SCAN_DURATION - Duration of a scanning session in units of 10 ms. Range: 0x0001 - 0xFFFF (10 ms to 10.9225 ms). If set to 0x0000, the scanning continues until it is explicitly disabled. 
+#ifndef NRF_BLE_SCAN_SCAN_DURATION
+#define NRF_BLE_SCAN_SCAN_DURATION 0
+#endif
+
+// <o> NRF_BLE_SCAN_SCAN_WINDOW - Scanning window. Determines the scanning window in units of 0.625 millisecond. 
+#ifndef NRF_BLE_SCAN_SCAN_WINDOW
+#define NRF_BLE_SCAN_SCAN_WINDOW 80
+#endif
+
+// <o> NRF_BLE_SCAN_MIN_CONNECTION_INTERVAL - Determines minimum connection interval in milliseconds. 
+#ifndef NRF_BLE_SCAN_MIN_CONNECTION_INTERVAL
+#define NRF_BLE_SCAN_MIN_CONNECTION_INTERVAL 7.5
+#endif
+
+// <o> NRF_BLE_SCAN_MAX_CONNECTION_INTERVAL - Determines maximum connection interval in milliseconds. 
+#ifndef NRF_BLE_SCAN_MAX_CONNECTION_INTERVAL
+#define NRF_BLE_SCAN_MAX_CONNECTION_INTERVAL 30
+#endif
+
+// <o> NRF_BLE_SCAN_SLAVE_LATENCY - Determines the slave latency in counts of connection events. 
+#ifndef NRF_BLE_SCAN_SLAVE_LATENCY
+#define NRF_BLE_SCAN_SLAVE_LATENCY 0
+#endif
+
+// <o> NRF_BLE_SCAN_SUPERVISION_TIMEOUT - Determines the supervision time-out in units of 10 millisecond. 
+#ifndef NRF_BLE_SCAN_SUPERVISION_TIMEOUT
+#define NRF_BLE_SCAN_SUPERVISION_TIMEOUT 4000
+#endif
+
+// <o> NRF_BLE_SCAN_SCAN_PHY  - PHY to scan on.
+ 
+// <0=> BLE_GAP_PHY_AUTO 
+// <1=> BLE_GAP_PHY_1MBPS 
+// <2=> BLE_GAP_PHY_2MBPS 
+// <4=> BLE_GAP_PHY_CODED 
+// <255=> BLE_GAP_PHY_NOT_SET 
+
+#ifndef NRF_BLE_SCAN_SCAN_PHY
+#define NRF_BLE_SCAN_SCAN_PHY 1
+#endif
+
+// <e> NRF_BLE_SCAN_FILTER_ENABLE - Enabling filters for the Scanning Module.
+//==========================================================
+#ifndef NRF_BLE_SCAN_FILTER_ENABLE
+#define NRF_BLE_SCAN_FILTER_ENABLE 1
+#endif
+// <o> NRF_BLE_SCAN_UUID_CNT - Number of filters for UUIDs. 
+#ifndef NRF_BLE_SCAN_UUID_CNT
+#define NRF_BLE_SCAN_UUID_CNT 1
+#endif
+
+// <o> NRF_BLE_SCAN_NAME_CNT - Number of name filters. 
+#ifndef NRF_BLE_SCAN_NAME_CNT
+#define NRF_BLE_SCAN_NAME_CNT 1
+#endif
+
+// <o> NRF_BLE_SCAN_SHORT_NAME_CNT - Number of short name filters. 
+#ifndef NRF_BLE_SCAN_SHORT_NAME_CNT
+#define NRF_BLE_SCAN_SHORT_NAME_CNT 0
+#endif
+
+// <o> NRF_BLE_SCAN_ADDRESS_CNT - Number of address filters. 
+#ifndef NRF_BLE_SCAN_ADDRESS_CNT
+#define NRF_BLE_SCAN_ADDRESS_CNT 1
+#endif
+
+// <o> NRF_BLE_SCAN_APPEARANCE_CNT - Number of appearance filters. 
+#ifndef NRF_BLE_SCAN_APPEARANCE_CNT
+#define NRF_BLE_SCAN_APPEARANCE_CNT 0
+#endif
+
+// </e>
+
+// </e>
+
 // <e> PEER_MANAGER_ENABLED - peer_manager - Peer Manager
 //==========================================================
 #ifndef PEER_MANAGER_ENABLED
-#define PEER_MANAGER_ENABLED 0
+#define PEER_MANAGER_ENABLED 1
 #endif
 // <o> PM_MAX_REGISTRANTS - Number of event handlers that can be registered. 
 #ifndef PM_MAX_REGISTRANTS
@@ -174,7 +356,7 @@
 // <i> If set to true, you need to call nrf_ble_lesc_request_handler() in the main loop to respond to LESC-related BLE events. If LESC support is not required, set this to false to save code space.
 
 #ifndef PM_LESC_ENABLED
-#define PM_LESC_ENABLED 0
+#define PM_LESC_ENABLED 1
 #endif
 
 // <e> PM_RA_PROTECTION_ENABLED - Enable/disable protection against repeated pairing attempts in Peer Manager.
@@ -239,7 +421,7 @@
  
 
 #ifndef BLE_BAS_C_ENABLED
-#define BLE_BAS_C_ENABLED 0
+#define BLE_BAS_C_ENABLED 1
 #endif
 
 // <e> BLE_BAS_ENABLED - ble_bas - Battery Service
@@ -339,7 +521,7 @@
  
 
 #ifndef BLE_HRS_C_ENABLED
-#define BLE_HRS_C_ENABLED 0
+#define BLE_HRS_C_ENABLED 1
 #endif
 
 // <q> BLE_HRS_ENABLED  - ble_hrs - Heart Rate Service
@@ -432,7 +614,7 @@
  
 
 #ifndef BLE_LBS_ENABLED
-#define BLE_LBS_ENABLED 1
+#define BLE_LBS_ENABLED 0
 #endif
 
 // <q> BLE_LLS_ENABLED  - ble_lls - Link Loss Service
@@ -452,7 +634,7 @@
 // <e> BLE_NUS_ENABLED - ble_nus - Nordic UART Service
 //==========================================================
 #ifndef BLE_NUS_ENABLED
-#define BLE_NUS_ENABLED 1
+#define BLE_NUS_ENABLED 0
 #endif
 // <e> BLE_NUS_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
@@ -657,7 +839,7 @@
 // <i> The CC310 hardware-accelerated cryptography backend (only available on nRF52840).
 //==========================================================
 #ifndef NRF_CRYPTO_BACKEND_CC310_ENABLED
-#define NRF_CRYPTO_BACKEND_CC310_ENABLED 0
+#define NRF_CRYPTO_BACKEND_CC310_ENABLED 1
 #endif
 // <q> NRF_CRYPTO_BACKEND_CC310_AES_CBC_ENABLED  - Enable the AES CBC mode using CC310.
  
@@ -1276,6 +1458,30 @@
 #endif
 
 // </e>
+
+// <h> nrf_crypto_rng - RNG Configuration
+
+//==========================================================
+// <q> NRF_CRYPTO_RNG_STATIC_MEMORY_BUFFERS_ENABLED  - Use static memory buffers for context and temporary init buffer.
+ 
+
+// <i> Always recommended when using the nRF HW RNG as the context and temporary buffers are small. Consider disabling if using the CC310 RNG in a RAM constrained application. In this case, memory must be provided to nrf_crypto_rng_init, or it can be allocated internally provided that NRF_CRYPTO_ALLOCATOR does not allocate memory on the stack.
+
+#ifndef NRF_CRYPTO_RNG_STATIC_MEMORY_BUFFERS_ENABLED
+#define NRF_CRYPTO_RNG_STATIC_MEMORY_BUFFERS_ENABLED 1
+#endif
+
+// <q> NRF_CRYPTO_RNG_AUTO_INIT_ENABLED  - Initialize the RNG module automatically when nrf_crypto is initialized.
+ 
+
+// <i> Automatic initialization is only supported with static or internally allocated context and temporary memory.
+
+#ifndef NRF_CRYPTO_RNG_AUTO_INIT_ENABLED
+#define NRF_CRYPTO_RNG_AUTO_INIT_ENABLED 1
+#endif
+
+// </h> 
+//==========================================================
 
 // </h> 
 //==========================================================
@@ -3164,7 +3370,7 @@
 // <e> NRFX_RNG_ENABLED - nrfx_rng - RNG peripheral driver
 //==========================================================
 #ifndef NRFX_RNG_ENABLED
-#define NRFX_RNG_ENABLED 0
+#define NRFX_RNG_ENABLED 1
 #endif
 // <q> NRFX_RNG_CONFIG_ERROR_CORRECTION  - Error correction
  
@@ -3244,7 +3450,7 @@
 // <e> NRFX_RTC_ENABLED - nrfx_rtc - RTC peripheral driver
 //==========================================================
 #ifndef NRFX_RTC_ENABLED
-#define NRFX_RTC_ENABLED 1
+#define NRFX_RTC_ENABLED 0
 #endif
 // <q> NRFX_RTC0_ENABLED  - Enable RTC0 instance
  
@@ -4515,7 +4721,7 @@
 // <e> NRFX_UART_ENABLED - nrfx_uart - UART peripheral driver
 //==========================================================
 #ifndef NRFX_UART_ENABLED
-#define NRFX_UART_ENABLED 1
+#define NRFX_UART_ENABLED 0
 #endif
 // <o> NRFX_UART0_ENABLED - Enable UART0 instance 
 #ifndef NRFX_UART0_ENABLED
@@ -4683,6 +4889,17 @@
 
 #ifndef NRFX_USBD_CONFIG_ISO_IN_ZLP
 #define NRFX_USBD_CONFIG_ISO_IN_ZLP 0
+#endif
+
+// <q> NRFX_USBD_USE_WORKAROUND_FOR_ANOMALY_211  - Use workaround for anomaly 211
+ 
+
+// <i> If set, workaround for anomaly 211 will be enabled.
+// <i> Anomaly 211 - Device remains in SUSPEND too long when host resumes
+// <i> bus activity (sending SOF packets) without a RESUME condition.
+
+#ifndef NRFX_USBD_USE_WORKAROUND_FOR_ANOMALY_211
+#define NRFX_USBD_USE_WORKAROUND_FOR_ANOMALY_211 0
 #endif
 
 // </e>
@@ -5296,7 +5513,7 @@
 // <e> RNG_ENABLED - nrf_drv_rng - RNG peripheral driver - legacy layer
 //==========================================================
 #ifndef RNG_ENABLED
-#define RNG_ENABLED 0
+#define RNG_ENABLED 1
 #endif
 // <q> RNG_CONFIG_ERROR_CORRECTION  - Error correction
  
@@ -5332,7 +5549,7 @@
 // <e> RTC_ENABLED - nrf_drv_rtc - RTC peripheral driver - legacy layer
 //==========================================================
 #ifndef RTC_ENABLED
-#define RTC_ENABLED 1
+#define RTC_ENABLED 0
 #endif
 // <o> RTC_DEFAULT_CONFIG_FREQUENCY - Frequency  <16-32768> 
 
@@ -5383,7 +5600,7 @@
  
 
 #ifndef RTC2_ENABLED
-#define RTC2_ENABLED 1
+#define RTC2_ENABLED 0
 #endif
 
 // <o> NRF_MAXIMUM_LATENCY_US - Maximum possible time[us] in highest priority interrupt 
@@ -5867,7 +6084,7 @@
 // <e> UART_ENABLED - nrf_drv_uart - UART/UARTE peripheral driver - legacy layer
 //==========================================================
 #ifndef UART_ENABLED
-#define UART_ENABLED 1
+#define UART_ENABLED 0
 #endif
 // <o> UART_DEFAULT_CONFIG_HWFC  - Hardware Flow Control
  
@@ -6082,13 +6299,6 @@
 // <h> nRF_Libraries 
 
 //==========================================================
-// <q> APP_FIFO_ENABLED  - app_fifo - Software FIFO implementation
- 
-
-#ifndef APP_FIFO_ENABLED
-#define APP_FIFO_ENABLED 1
-#endif
-
 // <q> APP_GPIOTE_ENABLED  - app_gpiote - GPIOTE events dispatcher
  
 
@@ -6261,21 +6471,6 @@
 
 // </h> 
 //==========================================================
-
-// </e>
-
-// <e> APP_UART_ENABLED - app_uart - UART driver
-//==========================================================
-#ifndef APP_UART_ENABLED
-#define APP_UART_ENABLED 1
-#endif
-// <o> APP_UART_DRIVER_INSTANCE  - UART instance used
- 
-// <0=> 0 
-
-#ifndef APP_UART_DRIVER_INSTANCE
-#define APP_UART_DRIVER_INSTANCE 0
-#endif
 
 // </e>
 
@@ -6617,7 +6812,7 @@
  
 
 #ifndef CRC16_ENABLED
-#define CRC16_ENABLED 0
+#define CRC16_ENABLED 1
 #endif
 
 // <q> CRC32_ENABLED  - crc32 - CRC32 calculation routines
@@ -6637,7 +6832,7 @@
 // <e> FDS_ENABLED - fds - Flash data storage module
 //==========================================================
 #ifndef FDS_ENABLED
-#define FDS_ENABLED 0
+#define FDS_ENABLED 1
 #endif
 // <h> Pages - Virtual page settings
 
@@ -6868,7 +7063,7 @@
 // <e> MEM_MANAGER_ENABLED - mem_manager - Dynamic memory allocator
 //==========================================================
 #ifndef MEM_MANAGER_ENABLED
-#define MEM_MANAGER_ENABLED 0
+#define MEM_MANAGER_ENABLED 1
 #endif
 // <o> MEMORY_MANAGER_SMALL_BLOCK_COUNT - Size of each memory blocks identified as 'small' block.  <0-255> 
 
@@ -7161,7 +7356,7 @@
 // <e> NRF_FSTORAGE_ENABLED - nrf_fstorage - Flash abstraction library
 //==========================================================
 #ifndef NRF_FSTORAGE_ENABLED
-#define NRF_FSTORAGE_ENABLED 0
+#define NRF_FSTORAGE_ENABLED 1
 #endif
 // <h> nrf_fstorage - Common settings
 
@@ -7355,7 +7550,7 @@
 // <e> NRF_QUEUE_ENABLED - nrf_queue - Queue module
 //==========================================================
 #ifndef NRF_QUEUE_ENABLED
-#define NRF_QUEUE_ENABLED 0
+#define NRF_QUEUE_ENABLED 1
 #endif
 // <q> NRF_QUEUE_CLI_CMDS  - Enable CLI commands specific to the module
  
@@ -7399,13 +7594,6 @@
 
 #ifndef NRF_TWI_MNGR_ENABLED
 #define NRF_TWI_MNGR_ENABLED 0
-#endif
-
-// <q> RETARGET_ENABLED  - retarget - Retargeting stdio functions
- 
-
-#ifndef RETARGET_ENABLED
-#define RETARGET_ENABLED 1
 #endif
 
 // <q> SLIP_ENABLED  - slip - SLIP encoding and decoding
@@ -7669,6 +7857,51 @@
 
 // </e>
 
+// <e> NRF_LOG_BACKEND_UART_ENABLED - nrf_log_backend_uart - Log UART backend
+//==========================================================
+#ifndef NRF_LOG_BACKEND_UART_ENABLED
+#define NRF_LOG_BACKEND_UART_ENABLED 0
+#endif
+// <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin 
+#ifndef NRF_LOG_BACKEND_UART_TX_PIN
+#define NRF_LOG_BACKEND_UART_TX_PIN 6
+#endif
+
+// <o> NRF_LOG_BACKEND_UART_BAUDRATE  - Default Baudrate
+ 
+// <323584=> 1200 baud 
+// <643072=> 2400 baud 
+// <1290240=> 4800 baud 
+// <2576384=> 9600 baud 
+// <3862528=> 14400 baud 
+// <5152768=> 19200 baud 
+// <7716864=> 28800 baud 
+// <10289152=> 38400 baud 
+// <15400960=> 57600 baud 
+// <20615168=> 76800 baud 
+// <30801920=> 115200 baud 
+// <61865984=> 230400 baud 
+// <67108864=> 250000 baud 
+// <121634816=> 460800 baud 
+// <251658240=> 921600 baud 
+// <268435456=> 1000000 baud 
+
+#ifndef NRF_LOG_BACKEND_UART_BAUDRATE
+#define NRF_LOG_BACKEND_UART_BAUDRATE 30801920
+#endif
+
+// <o> NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings. 
+// <i> Size of the buffer is a trade-off between RAM usage and processing.
+// <i> if buffer is smaller then strings will often be fragmented.
+// <i> It is recommended to use size which will fit typical log and only the
+// <i> longer one will be fragmented.
+
+#ifndef NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE
+#define NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE 64
+#endif
+
+// </e>
+
 // <e> NRF_LOG_ENABLED - nrf_log - Logger
 //==========================================================
 #ifndef NRF_LOG_ENABLED
@@ -7753,7 +7986,7 @@
 // <i> Log data is buffered and can be processed in idle.
 
 #ifndef NRF_LOG_DEFERRED
-#define NRF_LOG_DEFERRED 1
+#define NRF_LOG_DEFERRED 0
 #endif
 
 // <q> NRF_LOG_FILTERS_ENABLED  - Enable dynamic filtering of logs.
@@ -11338,17 +11571,17 @@
 // <i> Requested BLE GAP data length to be negotiated.
 
 #ifndef NRF_SDH_BLE_GAP_DATA_LENGTH
-#define NRF_SDH_BLE_GAP_DATA_LENGTH 182
+#define NRF_SDH_BLE_GAP_DATA_LENGTH 251
 #endif
 
 // <o> NRF_SDH_BLE_PERIPHERAL_LINK_COUNT - Maximum number of peripheral links. 
 #ifndef NRF_SDH_BLE_PERIPHERAL_LINK_COUNT
-#define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
+#define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 0
 #endif
 
 // <o> NRF_SDH_BLE_CENTRAL_LINK_COUNT - Maximum number of central links. 
 #ifndef NRF_SDH_BLE_CENTRAL_LINK_COUNT
-#define NRF_SDH_BLE_CENTRAL_LINK_COUNT 0
+#define NRF_SDH_BLE_CENTRAL_LINK_COUNT 1
 #endif
 
 // <o> NRF_SDH_BLE_TOTAL_LINK_COUNT - Total link count. 
@@ -11362,7 +11595,7 @@
 // <i> The time set aside for this connection on every connection interval in 1.25 ms units.
 
 #ifndef NRF_SDH_BLE_GAP_EVENT_LENGTH
-#define NRF_SDH_BLE_GAP_EVENT_LENGTH 6
+#define NRF_SDH_BLE_GAP_EVENT_LENGTH 320
 #endif
 
 // <o> NRF_SDH_BLE_GATT_MAX_MTU_SIZE - Static maximum MTU size. 
@@ -11626,90 +11859,6 @@
 
 #ifndef BSP_BTN_BLE_OBSERVER_PRIO
 #define BSP_BTN_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
-#endif
-
-// <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
-// <i> Priority with which BLE events are dispatched to the NFC pairing library.
-
-#ifndef NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO
-#define NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO 1
 #endif
 
 // <o> NFC_BLE_PAIR_LIB_BLE_OBSERVER_PRIO  
@@ -12022,6 +12171,16 @@
 
 // </h> 
 //==========================================================
+
+
+// <o> BLE_TEMP_C_BLE_OBSERVER_PRIO  
+// <i> Priority with which BLE events are dispatched to the Heart Rate Service Client.
+
+#ifndef BLE_TEMP_C_BLE_OBSERVER_PRIO
+#define BLE_TEMP_C_BLE_OBSERVER_PRIO 2
+#endif
+
+
 
 // <<< end of configuration section >>>
 #endif //SDK_CONFIG_H
