@@ -74,6 +74,8 @@
 #include "nrf_ble_scan.h"
 #include "ble_temp_c.h"
 
+#define PIN_HE0 NRF_GPIO_PIN_MAP(0,14)
+
 #define APP_BLE_CONN_CFG_TAG        1                                   /**< A tag identifying the SoftDevice BLE configuration. */
 
 #define APP_BLE_OBSERVER_PRIO       3                                   /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -104,6 +106,9 @@
         (*(DST))  |= (SRC)[0];   \
     } while (0)
 
+float _therm0_temp = 0;
+float _fire_temp = 0;
+bool _he0_state = false;
 
 NRF_BLE_GQ_DEF(m_ble_gatt_queue,                                    /**< BLE GATT Queue instance. */
                NRF_SDH_BLE_CENTRAL_LINK_COUNT,
@@ -541,9 +546,10 @@ static void temp_c_evt_handler(ble_temp_c_t * p_temp_c, ble_temp_c_evt_t * p_tem
         {
             char buffer[100];
             float temp = p_temp_c_evt->params.value_fire/100.0f;
+            _fire_temp = temp;
             sprintf(buffer, "Temp = %f", temp);
 
-            err_code = temp_fire_write(p_temp_c, temp);
+            err_code = temp_fire_write(p_temp_c, _therm0_temp);
 
             NRF_LOG_INFO("%s", buffer);
         } break;
@@ -895,6 +901,12 @@ void scanning_start(bool * p_erase_bonds)
     }
 }
 
+void he0_control(bool value) {
+    if (_he0_state != value) {
+        _he0_state = value;
+        nrf_gpio_pin_write(PIN_HE0, value);
+    }
+}
 
 int main(void)
 {
@@ -902,6 +914,7 @@ int main(void)
 
     // Initialize.
     log_init();
+    nrf_gpio_cfg_output(PIN_HE0);
     timer_init();
     power_management_init();
     buttons_leds_init(&erase_bonds);
@@ -919,6 +932,23 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
+        if (_he0_state == true) {
+            _therm0_temp += 0.1;
+        }
+        else {
+            _therm0_temp -= 0.1;
+        }
+
+        char buffer[64];
+        sprintf(buffer, "%f %f", _therm0_temp, _fire_temp);
+        NRF_LOG_INFO("%s", buffer);
+
+        if (_therm0_temp < _fire_temp) {
+            he0_control(true);
+        }
+        else {
+            he0_control(false);
+        }
         idle_state_handle();
     }
 }
