@@ -51,11 +51,11 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_rtc.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
   $(PROJ_DIR)/main.c \
-  $(PROJ_DIR)/fire.c \
-  $(PROJ_DIR)/garage.c \
+  $(PROJ_DIR)/graphics/fire.c \
+  $(PROJ_DIR)/graphics/garage.c \
   $(PROJ_DIR)/ble_temp.c \
-  $(PROJ_DIR)/st7735/st7735.c \
-  $(PROJ_DIR)/max31865/max31865.c \
+  $(PROJ_DIR)/peripherals/st7735/st7735.c \
+  $(PROJ_DIR)/peripherals/max31865/max31865.c \
   $(PROJ_DIR)/lvgl/src/./lv_core/lv_obj.c \
   $(PROJ_DIR)/lvgl/src/./lv_core/lv_refr.c \
   $(PROJ_DIR)/lvgl/src/./lv_core/lv_style.c \
@@ -122,6 +122,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ble/ble_advertising \
   $(SDK_ROOT)/modules/nrfx/mdk \
   $(PROJ_DIR) \
+  $(PROJ_DIR)/peripherals \
   $(SDK_ROOT)/components/libraries/strerror \
   $(SDK_ROOT)/components/toolchain/cmsis/include \
   $(SDK_ROOT)/components/libraries/util \
