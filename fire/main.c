@@ -2,6 +2,7 @@
 #include <string.h>
 #include "nordic_common.h"
 #include "nrf.h"
+#include "nrf_drv_rtc.h"
 #include "app_error.h"
 #include "ble.h"
 #include "ble_err.h"
@@ -40,6 +41,16 @@ const nrf_drv_timer_t TEMP_TIMER = NRF_DRV_TIMER_INSTANCE(2);
 
 #define PT100_RREF      430.0
 #define PT100_RNOMINAL  100.0
+#define FORCE_ON_MAX_DURATION 1
+
+// rtc
+const nrf_drv_rtc_t rtc = NRF_DRV_RTC_INSTANCE(2);
+int _time_8hz = 0;
+int _time_sec = 0;
+int _time_min = 0;
+// end rtc
+
+bool _force_heating = false;
 
 // lvgl
 
@@ -95,11 +106,6 @@ static void gfx_initialization(void)
 {
     APP_ERROR_CHECK(nrf_gfx_init(p_lcd));
 }
-
-#define ADVERTISING_LED                 BSP_BOARD_LED_0                         /**< Is on when device is advertising. */
-#define CONNECTED_LED                   BSP_BOARD_LED_1                         /**< Is on when device has connected. */
-#define LEDBUTTON_LED                   BSP_BOARD_LED_2                         /**< LED to be toggled with the help of the LED Button Service. */
-#define LEDBUTTON_BUTTON                BSP_BUTTON_0                            /**< Button that will trigger the notification event with the LED Button Service */
 
 #define DEVICE_NAME                     "GP-Temp-Fire"                         /**< Name of device. Will be included in the advertising data. */
 
@@ -188,6 +194,22 @@ static void timers_init(void)
     // Initialize timer module, making it use the scheduler
     ret_code_t err_code = app_timer_init();
     APP_ERROR_CHECK(err_code);
+}
+
+
+static void switch_force_heating() {
+    if (_force_heating == true) {
+        _force_heating = false;
+        NRF_LOG_INFO("Force heating OFF");
+        lv_label_set_text(fire_temp_label, "OFF");
+    }
+    else {
+        _force_heating = true;
+        _time_8hz = 0;
+        _time_sec = 0;
+        _time_min = 0;
+        lv_label_set_text(fire_temp_label, "ON");
+    }
 }
 
 /**@brief Function for the GAP initialization.
@@ -405,7 +427,7 @@ static void advertising_start(void)
     err_code = sd_ble_gap_adv_start(m_adv_handle, APP_BLE_CONN_CFG_TAG);
     APP_ERROR_CHECK(err_code);
 
-    bsp_board_led_on(ADVERTISING_LED);
+    // bsp_board_led_on(ADVERTISING_LED);
 }
 
 /**@brief Function for handling BLE events.
@@ -421,8 +443,8 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     {
         case BLE_GAP_EVT_CONNECTED:
             NRF_LOG_INFO("Connected");
-            bsp_board_led_on(CONNECTED_LED);
-            bsp_board_led_off(ADVERTISING_LED);
+            // bsp_board_led_on(CONNECTED_LED);
+            // bsp_board_led_off(ADVERTISING_LED);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
             APP_ERROR_CHECK(err_code);
@@ -432,7 +454,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("Disconnected");
-            bsp_board_led_off(CONNECTED_LED);
+            // bsp_board_led_off(CONNECTED_LED);
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
             err_code = app_button_disable();
             APP_ERROR_CHECK(err_code);
@@ -520,11 +542,17 @@ static void ble_stack_init(void)
  */
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
-    switch (pin_no)
+     if (button_action == APP_BUTTON_PUSH)
     {
-        default:
-            APP_ERROR_HANDLER(pin_no);
-            break;
+        switch (pin_no)
+        {
+            case BSP_BUTTON_0:
+                switch_force_heating();
+                break;
+            default:
+                APP_ERROR_HANDLER(pin_no);
+                break;
+        }
     }
 }
 
@@ -537,7 +565,7 @@ static void buttons_init(void)
     //The array must be static because a pointer to it will be saved in the button handler module.
     static app_button_cfg_t buttons[] =
     {
-        {LEDBUTTON_BUTTON, false, BUTTON_PULL, button_event_handler}
+        {BSP_BUTTON_0, false, BUTTON_PULL, button_event_handler}
     };
 
     err_code = app_button_init(buttons, ARRAY_SIZE(buttons),
@@ -598,6 +626,41 @@ void timer_init() {
     nrf_drv_timer_enable(&TEMP_TIMER);
 }
 
+static void rtc_handler(nrf_drv_rtc_int_type_t int_type)
+{
+    _time_8hz++;
+    if (_time_8hz >= 8) {
+        _time_8hz = 0;
+        _time_sec++;
+    }
+    if (_time_sec >= 60) {
+        _time_sec = 0;
+        _time_min++;
+    }
+    if (_time_min >= FORCE_ON_MAX_DURATION) {
+        _time_min = 0;
+        _force_heating = false;
+        NRF_LOG_INFO("Force on turned OFF");
+    }
+}
+
+static void rtc_config(void)
+{
+    uint32_t err_code;
+
+    //Initialize RTC instance
+    nrf_drv_rtc_config_t config = NRF_DRV_RTC_DEFAULT_CONFIG;
+    config.prescaler = 4095;
+    err_code = nrfx_rtc_init(&rtc, &config, rtc_handler);
+    APP_ERROR_CHECK(err_code);
+
+    //Enable tick event & interrupt
+    nrfx_rtc_tick_enable(&rtc,true);
+
+    //Power on RTC instance
+    nrfx_rtc_enable(&rtc);
+}
+
 /**@brief Function for application main entry.
  */
 
@@ -610,6 +673,7 @@ int main(void)
     timers_init();
     buttons_init();
     power_management_init();
+    rtc_config();
 
     gfx_initialization();
     nrf_delay_ms(10);
@@ -695,17 +759,31 @@ int main(void)
         p_lcd->lcd_uninit();
 
         if (should_read_temp) {
+            float temp;
+            int16_t temp_i16;
+
             char buffer[64];
-            APP_ERROR_CHECK(max31865_spi_init());
-            float temp = max31865_temperature(PT100_RNOMINAL, PT100_RREF);
-            max31865_spi_uninit();
-            sprintf(buffer, "%.1f", temp);
-            lv_label_set_text(fire_temp_label, buffer);
-            int16_t temp_i = temp * 100.0f;
-            ble_temp_fire_update(&m_temp, temp_i);
-            uint32_t err_code = ble_temp_garage_get(&m_temp, &temp_i);
+            if (_force_heating) {
+                temp = 60.0f;
+                sprintf(buffer, "ON");
+                // sprintf(buffer, "%02d:%02d", _time_min, _time_sec);
+                lv_label_set_text(fire_temp_label, buffer);
+                temp_i16 = temp * 100.0f;
+                ble_temp_fire_update(&m_temp, temp_i16);
+            }
+            else {
+                APP_ERROR_CHECK(max31865_spi_init());
+                temp = max31865_temperature(PT100_RNOMINAL, PT100_RREF);
+                max31865_spi_uninit();
+                sprintf(buffer, "%.1f", temp);
+                lv_label_set_text(fire_temp_label, buffer);
+                temp_i16 = temp * 100.0f;
+                ble_temp_fire_update(&m_temp, temp_i16);    
+            }
+
+            uint32_t err_code = ble_temp_garage_get(&m_temp, &temp_i16);
             if (err_code == NRF_SUCCESS) {
-                temp = temp_i / 100.0f;
+                temp = temp_i16 / 100.0f;
                 sprintf(buffer, "%.1f", temp);
                 lv_label_set_text(garage_temp_label, buffer);
             }
