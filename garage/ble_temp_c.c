@@ -89,12 +89,12 @@ static void on_hvx(ble_temp_c_t * p_ble_temp_c, const ble_evt_t * p_ble_evt)
         return;
     }
 
-    NRF_LOG_INFO("Received HVX on link 0x%x, hrm_handle 0x%x",
-    p_ble_evt->evt.gattc_evt.params.hvx.handle,
-    p_ble_temp_c->peer_hrs_db.hrm_handle);
+    NRF_LOG_INFO("Received HVX on link 0x%x,.fire_handle 0x%x",
+        p_ble_evt->evt.gattc_evt.params.hvx.handle,
+        p_ble_temp_c->peer_temp_db.fire_handle);
 
     // Check if this is a Temp notification.
-    if (p_ble_evt->evt.gattc_evt.params.hvx.handle == p_ble_temp_c->peer_hrs_db.hrm_handle)
+    if (p_ble_evt->evt.gattc_evt.params.hvx.handle == p_ble_temp_c->peer_temp_db.fire_handle)
     {
         ble_temp_c_evt_t ble_temp_c_evt;
 
@@ -125,9 +125,10 @@ static void on_disconnected(ble_temp_c_t * p_ble_temp_c, const ble_evt_t * p_ble
 {
     if (p_ble_temp_c->conn_handle == p_ble_evt->evt.gap_evt.conn_handle)
     {
-        p_ble_temp_c->conn_handle                 = BLE_CONN_HANDLE_INVALID;
-        p_ble_temp_c->peer_hrs_db.hrm_cccd_handle = BLE_GATT_HANDLE_INVALID;
-        p_ble_temp_c->peer_hrs_db.hrm_handle      = BLE_GATT_HANDLE_INVALID;
+        p_ble_temp_c->conn_handle                   = BLE_CONN_HANDLE_INVALID;
+        p_ble_temp_c->peer_temp_db.temp_cccd_handle = BLE_GATT_HANDLE_INVALID;
+        p_ble_temp_c->peer_temp_db.fire_handle      = BLE_GATT_HANDLE_INVALID;
+        p_ble_temp_c->peer_temp_db.garage_handle    = BLE_GATT_HANDLE_INVALID;
     }
 }
 
@@ -153,15 +154,16 @@ void ble_temp_on_db_disc_evt(ble_temp_c_t * p_ble_temp_c, const ble_db_discovery
 
         for (i = 0; i < p_evt->params.discovered_db.char_count; i++)
         {
-            if (p_evt->params.discovered_db.charateristics[i].characteristic.uuid.uuid ==
-                FIRE_VALUE_CHAR_UUID)
+            NRF_LOG_INFO("Found char");
+            NRF_LOG_HEXDUMP_INFO(&p_evt->params.discovered_db.charateristics[i].characteristic.uuid.uuid, 2);
+            if (p_evt->params.discovered_db.charateristics[i].characteristic.uuid.uuid == FIRE_VALUE_CHAR_UUID)
             {
-                // Found Temp characteristic. Store CCCD handle and break.
-                evt.params.peer_db.hrm_cccd_handle =
-                    p_evt->params.discovered_db.charateristics[i].cccd_handle;
-                evt.params.peer_db.hrm_handle =
-                    p_evt->params.discovered_db.charateristics[i].characteristic.handle_value;
-                break;
+                evt.params.peer_db.temp_cccd_handle = p_evt->params.discovered_db.charateristics[i].cccd_handle;
+                evt.params.peer_db.fire_handle = p_evt->params.discovered_db.charateristics[i].characteristic.handle_value;
+            }
+            if (p_evt->params.discovered_db.charateristics[i].characteristic.uuid.uuid == GARAGE_VALUE_CHAR_UUID)
+            {
+                evt.params.peer_db.garage_handle = p_evt->params.discovered_db.charateristics[i].characteristic.handle_value;
             }
         }
 
@@ -169,10 +171,13 @@ void ble_temp_on_db_disc_evt(ble_temp_c_t * p_ble_temp_c, const ble_db_discovery
         //If the instance has been assigned prior to db_discovery, assign the db_handles.
         if (p_ble_temp_c->conn_handle != BLE_CONN_HANDLE_INVALID)
         {
-            if ((p_ble_temp_c->peer_hrs_db.hrm_cccd_handle == BLE_GATT_HANDLE_INVALID)&&
-                (p_ble_temp_c->peer_hrs_db.hrm_handle == BLE_GATT_HANDLE_INVALID))
+            if (
+                    (p_ble_temp_c->peer_temp_db.temp_cccd_handle == BLE_GATT_HANDLE_INVALID) &&  
+                    (p_ble_temp_c->peer_temp_db.fire_handle == BLE_GATT_HANDLE_INVALID) && 
+                    (p_ble_temp_c->peer_temp_db.garage_handle == BLE_GATT_HANDLE_INVALID)
+                )
             {
-                p_ble_temp_c->peer_hrs_db = evt.params.peer_db;
+                p_ble_temp_c->peer_temp_db = evt.params.peer_db;
             }
         }
 
@@ -198,12 +203,13 @@ uint32_t ble_temp_c_init(ble_temp_c_t * p_ble_temp_c, ble_temp_c_init_t * p_ble_
     temp_uuid.type = uuid_type;
     temp_uuid.uuid = TEMP_SERVICE_UUID;
 
-    p_ble_temp_c->evt_handler                 = p_ble_temp_c_init->evt_handler;
-    p_ble_temp_c->error_handler               = p_ble_temp_c_init->error_handler;
-    p_ble_temp_c->p_gatt_queue                = p_ble_temp_c_init->p_gatt_queue;
-    p_ble_temp_c->conn_handle                 = BLE_CONN_HANDLE_INVALID;
-    p_ble_temp_c->peer_hrs_db.hrm_cccd_handle = BLE_GATT_HANDLE_INVALID;
-    p_ble_temp_c->peer_hrs_db.hrm_handle      = BLE_GATT_HANDLE_INVALID;
+    p_ble_temp_c->evt_handler                   = p_ble_temp_c_init->evt_handler;
+    p_ble_temp_c->error_handler                 = p_ble_temp_c_init->error_handler;
+    p_ble_temp_c->p_gatt_queue                  = p_ble_temp_c_init->p_gatt_queue;
+    p_ble_temp_c->conn_handle                   = BLE_CONN_HANDLE_INVALID;
+    p_ble_temp_c->peer_temp_db.temp_cccd_handle = BLE_GATT_HANDLE_INVALID;
+    p_ble_temp_c->peer_temp_db.fire_handle      = BLE_GATT_HANDLE_INVALID;
+    p_ble_temp_c->peer_temp_db.garage_handle    = BLE_GATT_HANDLE_INVALID;
 
     return ble_db_discovery_evt_register(&temp_uuid);
 }
@@ -232,33 +238,57 @@ void ble_temp_c_on_ble_evt(ble_evt_t const * p_ble_evt, void * p_context)
     }
 }
 
+uint32_t temp_fire_write(ble_temp_c_t * p_ble_temp_c, float temp)
+{
+    NRF_LOG_INFO("Writing temp to gp-temp-fire");
+
+    nrf_ble_gq_req_t temp_c_req;
+    uint8_t          temp_bytes[2];
+    int16_t          temp_val = temp * 100;
+
+    temp_bytes[0] = MSB_16(temp_val);
+    temp_bytes[1] = LSB_16(temp_val);
+
+    memset(&temp_c_req, 0, sizeof(temp_c_req));
+
+    temp_c_req.type                        = NRF_BLE_GQ_REQ_GATTC_WRITE;
+    temp_c_req.error_handler.cb            = gatt_error_handler;
+    temp_c_req.error_handler.p_ctx         = p_ble_temp_c;
+    temp_c_req.params.gattc_write.handle   = p_ble_temp_c->peer_temp_db.garage_handle;
+    temp_c_req.params.gattc_write.len      = 2;
+    temp_c_req.params.gattc_write.p_value  = temp_bytes;
+    temp_c_req.params.gattc_write.write_op = BLE_GATT_OP_WRITE_REQ;
+
+    return nrf_ble_gq_item_add(p_ble_temp_c->p_gatt_queue, &temp_c_req, p_ble_temp_c->conn_handle);
+}
+
 
 /**@brief Function for creating a message for writing to the CCCD.
  */
 static uint32_t cccd_configure(ble_temp_c_t * p_ble_temp_c, bool enable)
 {
     NRF_LOG_INFO("Configuring CCCD. CCCD Handle = %d, Connection Handle = %d",
-                  p_ble_temp_c->peer_hrs_db.hrm_cccd_handle,
+                  p_ble_temp_c->peer_temp_db.temp_cccd_handle,
                   p_ble_temp_c->conn_handle);
 
-    nrf_ble_gq_req_t hrs_c_req;
+    nrf_ble_gq_req_t temp_c_req;
     uint8_t          cccd[BLE_CCCD_VALUE_LEN];
     uint16_t         cccd_val = enable ? BLE_GATT_HVX_NOTIFICATION : 0;
 
     cccd[0] = LSB_16(cccd_val);
     cccd[1] = MSB_16(cccd_val);
 
-    memset(&hrs_c_req, 0, sizeof(hrs_c_req));
+    memset(&temp_c_req, 0, sizeof(temp_c_req));
 
-    hrs_c_req.type                        = NRF_BLE_GQ_REQ_GATTC_WRITE;
-    hrs_c_req.error_handler.cb            = gatt_error_handler;
-    hrs_c_req.error_handler.p_ctx         = p_ble_temp_c;
-    hrs_c_req.params.gattc_write.handle   = p_ble_temp_c->peer_hrs_db.hrm_cccd_handle;
-    hrs_c_req.params.gattc_write.len      = BLE_CCCD_VALUE_LEN;
-    hrs_c_req.params.gattc_write.p_value  = cccd;
-    hrs_c_req.params.gattc_write.write_op = BLE_GATT_OP_WRITE_REQ;
+    temp_c_req.type                        = NRF_BLE_GQ_REQ_GATTC_WRITE;
+    temp_c_req.error_handler.cb            = gatt_error_handler;
+    temp_c_req.error_handler.p_ctx         = p_ble_temp_c;
+    temp_c_req.params.gattc_write.handle   = p_ble_temp_c->peer_temp_db.temp_cccd_handle;
+    temp_c_req.params.gattc_write.len      = BLE_CCCD_VALUE_LEN;
+    temp_c_req.params.gattc_write.p_value  = cccd;
+    temp_c_req.params.gattc_write.write_op = BLE_GATT_OP_WRITE_REQ;
 
-    return nrf_ble_gq_item_add(p_ble_temp_c->p_gatt_queue, &hrs_c_req, p_ble_temp_c->conn_handle);
+    return nrf_ble_gq_item_add(p_ble_temp_c->p_gatt_queue, &temp_c_req, p_ble_temp_c->conn_handle);
 }
 
 
@@ -279,7 +309,7 @@ uint32_t ble_temp_c_handles_assign(ble_temp_c_t    * p_ble_temp_c,
     p_ble_temp_c->conn_handle = conn_handle;
     if (p_peer_temp_handles != NULL)
     {
-        p_ble_temp_c->peer_hrs_db = *p_peer_temp_handles;
+        p_ble_temp_c->peer_temp_db = *p_peer_temp_handles;
     }
 
     return nrf_ble_gq_conn_handle_register(p_ble_temp_c->p_gatt_queue, conn_handle);

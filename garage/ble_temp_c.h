@@ -143,8 +143,9 @@ typedef enum
 /**@brief Structure containing the handles related to the Temp Service found on the peer. */
 typedef struct
 {
-    uint16_t hrm_cccd_handle;  /**< Handle of the CCCD of the Temp Measurement characteristic. */
-    uint16_t hrm_handle;       /**< Handle of the Temp Measurement characteristic, as provided by the SoftDevice. */
+    uint16_t temp_cccd_handle;  /**< Handle of the CCCD of the Temp Measurement characteristic. */
+    uint16_t fire_handle;       /**< Handle of the Temp Measurement characteristic, as provided by the SoftDevice. */
+    uint16_t garage_handle;       /**< Handle of the Temp Measurement characteristic, as provided by the SoftDevice. */
 } temp_db_t;
 
 /**@brief Temp Event structure. */
@@ -188,7 +189,7 @@ typedef void (* ble_temp_c_evt_handler_t) (ble_temp_c_t * p_ble_temp_c, ble_temp
 struct ble_temp_c_s
 {
     uint16_t                conn_handle;   /**< Connection handle, as provided by the SoftDevice. */
-    temp_db_t                peer_hrs_db;   /**< Handles related to HRS on the peer. */
+    temp_db_t                peer_temp_db;   /**< Handles related to HRS on the peer. */
     ble_temp_c_evt_handler_t evt_handler;   /**< Application event handler to be called when there is an event related to the Temp Service. */
     ble_srv_error_handler_t error_handler; /**< Function to be called in case of an error. */
     nrf_ble_gq_t          * p_gatt_queue;  /**< Pointer to the BLE GATT Queue instance. */
@@ -287,6 +288,9 @@ void ble_temp_on_db_disc_evt(ble_temp_c_t * p_ble_temp_c, const ble_db_discovery
 uint32_t ble_temp_c_handles_assign(ble_temp_c_t *    p_ble_temp_c,
                                   uint16_t         conn_handle,
                                   const temp_db_t * p_peer_temp_handles);
+
+                                  
+uint32_t temp_fire_write(ble_temp_c_t * p_ble_temp_c, float temp);
 
 /** @} */ // End tag for Function group.
 

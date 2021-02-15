@@ -543,6 +543,8 @@ static void temp_c_evt_handler(ble_temp_c_t * p_temp_c, ble_temp_c_evt_t * p_tem
             float temp = p_temp_c_evt->params.value_fire/100.0f;
             sprintf(buffer, "Temp = %f", temp);
 
+            err_code = temp_fire_write(p_temp_c, temp);
+
             NRF_LOG_INFO("%s", buffer);
         } break;
 
