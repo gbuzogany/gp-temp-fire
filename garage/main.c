@@ -73,6 +73,17 @@
 #include "nrf_log_default_backends.h"
 #include "nrf_ble_scan.h"
 #include "ble_temp_c.h"
+#include <math.h>
+
+
+// timer
+#include "nrf.h"
+#include "nrf_drv_timer.h"
+#include "bsp.h"
+
+// saadc
+#include "nrf_drv_saadc.h"
+#include "nrf_drv_ppi.h"
 
 #define PIN_HE0 NRF_GPIO_PIN_MAP(0,14)
 
@@ -96,6 +107,14 @@
 
 #define TARGET_UUID                 {0x85, 0x5E, 0xA3, 0xD4, 0x6D, 0x3A, 0x11, 0xEB, \
                                           0x94, 0x39, 0x02, 0x42, 0xAC, 0x13, 0x00, 0x02}         /**< Target device uuid that application is looking for. */
+
+// saadc
+
+#define SAMPLES_IN_BUFFER 16
+static const nrf_drv_timer_t m_timer = NRF_DRV_TIMER_INSTANCE(3);
+static nrf_saadc_value_t     m_buffer[SAMPLES_IN_BUFFER];
+
+// end saadc
 
 /**@brief Macro to unpack 16bit unsigned UUID from octet stream. */
 #define UUID16_EXTRACT(DST, SRC) \
@@ -174,6 +193,44 @@ static void scan_start(void);
 void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
 {
     app_error_handler(0xDEADBEEF, line_num, p_file_name);
+}
+
+void timer_handler(nrf_timer_event_t event_type, void * p_context)
+{
+    nrf_drv_saadc_sample();
+}
+
+void saadc_callback(nrf_drv_saadc_evt_t const * p_event)
+{
+    if (p_event->type == NRF_DRV_SAADC_EVT_DONE)
+    {
+        float R1 = 80000;
+        float logR2, R2, temp;
+        float c1 = 0.6698104744e-03, c2 = 2.234729145e-04, c3 = 0.7298708978e-07;
+        
+        ret_code_t err_code;
+
+        err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
+        APP_ERROR_CHECK(err_code);
+
+        float avg = 0;
+
+        for (int i = 0; i < SAMPLES_IN_BUFFER; i++)
+        {
+            avg += (float) p_event->data.done.p_buffer[i] / SAMPLES_IN_BUFFER;
+        }
+
+        R2 = R1 * (4095.0 / avg - 1.0);
+        logR2 = log(R2);
+        temp = (1.0 / (c1 + c2*logR2 + c3*logR2*logR2*logR2));
+        temp = temp - 273.15;
+
+        _therm0_temp = temp;
+
+        char buffer[32];
+        sprintf(buffer, "%f", temp);
+        NRF_LOG_INFO("%s", buffer);
+    }
 }
 
 
@@ -908,6 +965,43 @@ void he0_control(bool value) {
     }
 }
 
+
+void saadc_init(void)
+{
+    ret_code_t err_code;
+    uint32_t time_ms = 100;
+    uint32_t time_ticks;
+    
+    nrf_drv_saadc_config_t saadc_config;
+
+    saadc_config.low_power_mode = false;                                                   //Enable low power mode.
+    saadc_config.resolution = SAADC_RESOLUTION_VAL_12bit;                                 //Set SAADC resolution to 12-bit. This will make the SAADC output values from 0 (when input voltage is 0V) to 2^12=4096 (when input voltage is 3.6V for channel gain setting of 1/6).
+    saadc_config.oversample = NRF_SAADC_OVERSAMPLE_DISABLED;                                           //Set oversample to 4x. This will make the SAADC output a single averaged value when the SAMPLE task is triggered 4 times.
+    saadc_config.interrupt_priority = APP_IRQ_PRIORITY_MID;  
+
+    err_code = nrf_drv_saadc_init(&saadc_config, saadc_callback);
+    APP_ERROR_CHECK(err_code);
+
+    nrf_saadc_channel_config_t channel_config_a2 = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN2);
+
+    err_code = nrf_drv_saadc_channel_init(2, &channel_config_a2);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = nrf_drv_saadc_buffer_convert(m_buffer, SAMPLES_IN_BUFFER);
+    APP_ERROR_CHECK(err_code);
+
+    nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
+    err_code = nrf_drv_timer_init(&m_timer, &timer_cfg, timer_handler);
+    APP_ERROR_CHECK(err_code);
+
+    time_ticks = nrf_drv_timer_ms_to_ticks(&m_timer, time_ms);
+
+    nrf_drv_timer_extended_compare(
+        &m_timer, NRF_TIMER_CC_CHANNEL0, time_ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
+
+    nrf_drv_timer_enable(&m_timer);
+}
+
 int main(void)
 {
     bool erase_bonds;
@@ -923,6 +1017,9 @@ int main(void)
     peer_manager_init();
     db_discovery_init();
     temp_c_init();
+
+    saadc_init();
+
     scan_init();
 
     // Start execution.
@@ -932,16 +1029,9 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        if (_he0_state == true) {
-            _therm0_temp += 0.1;
-        }
-        else {
-            _therm0_temp -= 0.1;
-        }
-
-        char buffer[64];
-        sprintf(buffer, "%f %f", _therm0_temp, _fire_temp);
-        NRF_LOG_INFO("%s", buffer);
+        // char buffer[64];
+        // sprintf(buffer, "%f %f", _therm0_temp, _fire_temp);
+        // NRF_LOG_INFO("%s", buffer);
 
         if (_therm0_temp < _fire_temp) {
             he0_control(true);
