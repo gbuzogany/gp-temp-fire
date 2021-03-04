@@ -266,6 +266,24 @@ static uint32_t custom_value_char_add(ble_temp_t * p_temp, const ble_temp_init_t
     }
     p_temp->characteristic_handles[TEMP_GARAGE_CHAR] = char_handles.value_handle;
 
+    ble_gatts_value_t gatts_value;
+
+    // Initialize value struct.
+    memset(&gatts_value, 0, sizeof(gatts_value));
+
+    uint8_t buffer[2];
+    buffer[0] = 0;
+    buffer[1] = 0;
+
+    gatts_value.len     = sizeof(int16_t);
+    gatts_value.offset  = 0;
+    gatts_value.p_value = buffer;
+
+    // Update database.
+    err_code = sd_ble_gatts_value_set(p_temp->conn_handle,
+                                      p_temp->characteristic_handles[TEMP_FIRE_CHAR],
+                                      &gatts_value);
+
     return NRF_SUCCESS;
 }
 

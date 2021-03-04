@@ -41,7 +41,7 @@ const nrf_drv_timer_t TEMP_TIMER = NRF_DRV_TIMER_INSTANCE(2);
 
 #define PT100_RREF      430.0
 #define PT100_RNOMINAL  100.0
-#define FORCE_ON_MAX_DURATION 1
+#define FORCE_ON_MAX_DURATION 180
 
 // rtc
 const nrf_drv_rtc_t rtc = NRF_DRV_RTC_INSTANCE(2);
@@ -50,7 +50,8 @@ int _time_sec = 0;
 int _time_min = 0;
 // end rtc
 
-bool _force_heating = false;
+static bool _force_heating = false;
+static bool _connected = false;
 
 // lvgl
 
@@ -58,6 +59,7 @@ lv_obj_t *fire_temp_label;
 lv_obj_t *garage_temp_label;
 lv_obj_t *fire_img;
 lv_obj_t *garage_img;
+// lv_obj_t *connected_icon;
 
 LV_IMG_DECLARE(fire);
 LV_IMG_DECLARE(garage);
@@ -443,6 +445,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     {
         case BLE_GAP_EVT_CONNECTED:
             NRF_LOG_INFO("Connected");
+            _connected = true;
             // bsp_board_led_on(CONNECTED_LED);
             // bsp_board_led_off(ADVERTISING_LED);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
@@ -454,6 +457,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("Disconnected");
+            _connected = false;
             // bsp_board_led_off(CONNECTED_LED);
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
             err_code = app_button_disable();
@@ -724,6 +728,16 @@ int main(void)
     lv_obj_align(garage_img, NULL, LV_ALIGN_CENTER, 0, -20);
     lv_obj_set_pos(garage_img, 0, 40);
 
+    // static lv_style_t obj_style;
+    // lv_style_init(&obj_style);
+    // lv_style_set_radius(&obj_style, LV_STATE_DEFAULT, 0);
+    // lv_style_set_bg_color(&obj_style, LV_STATE_DEFAULT, LV_COLOR_RED);
+
+    // connected_icon = lv_obj_create(lv_scr_act(), NULL);
+    // lv_obj_add_style(connected_icon, LV_OBJ_PART_MAIN, &obj_style);
+    // lv_obj_set_size(connected_icon, 40, 40);
+    // lv_obj_set_pos(connected_icon, 40, 40);
+
     UNUSED_VARIABLE(event_handler_btn);
 
     lv_anim_t a;
@@ -781,12 +795,18 @@ int main(void)
                 ble_temp_fire_update(&m_temp, temp_i16);    
             }
 
-            uint32_t err_code = ble_temp_garage_get(&m_temp, &temp_i16);
-            if (err_code == NRF_SUCCESS) {
-                temp = temp_i16 / 100.0f;
-                sprintf(buffer, "%.1f", temp);
-                lv_label_set_text(garage_temp_label, buffer);
+            if (_connected == false) {
+                lv_label_set_text(garage_temp_label, "--");
             }
+            else {
+                uint32_t err_code = ble_temp_garage_get(&m_temp, &temp_i16);
+                if (err_code == NRF_SUCCESS) {
+                    temp = temp_i16 / 100.0f;
+                    sprintf(buffer, "%.1f", temp);
+                    lv_label_set_text(garage_temp_label, buffer);
+                }
+            }
+            
             should_read_temp = false;
         }
     }
