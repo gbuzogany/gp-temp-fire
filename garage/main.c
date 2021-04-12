@@ -108,6 +108,8 @@
 #define TARGET_UUID                 {0x85, 0x5E, 0xA3, 0xD4, 0x6D, 0x3A, 0x11, 0xEB, \
                                           0x94, 0x39, 0x02, 0x42, 0xAC, 0x13, 0x00, 0x02}         /**< Target device uuid that application is looking for. */
 
+#define TX_POWER_LEVEL  (8)
+
 // saadc
 
 #define SAMPLES_IN_BUFFER 16
@@ -331,6 +333,9 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
             err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
             APP_ERROR_CHECK(err_code);
+
+            uint32_t err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_CONN, m_conn_handle, TX_POWER_LEVEL); 
+            APP_ERROR_CHECK(err_code); 
 
             if (ble_conn_state_central_conn_count() < NRF_SDH_BLE_CENTRAL_LINK_COUNT)
             {

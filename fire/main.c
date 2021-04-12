@@ -43,6 +43,8 @@ const nrf_drv_timer_t TEMP_TIMER = NRF_DRV_TIMER_INSTANCE(2);
 #define PT100_RNOMINAL  100.0
 #define FORCE_ON_MAX_DURATION 180
 
+#define TX_POWER_LEVEL  (8)
+
 // rtc
 const nrf_drv_rtc_t rtc = NRF_DRV_RTC_INSTANCE(2);
 int _time_8hz = 0;
@@ -451,6 +453,10 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
             APP_ERROR_CHECK(err_code);
+
+            uint32_t err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_CONN, m_conn_handle, TX_POWER_LEVEL); 
+            APP_ERROR_CHECK(err_code); 
+
             err_code = app_button_enable();
             APP_ERROR_CHECK(err_code);
             break;
@@ -665,6 +671,14 @@ static void rtc_config(void)
     nrfx_rtc_enable(&rtc);
 }
 
+/**@brief Function for changing the tx power.
+ */
+static void tx_power_set(void)
+{
+    ret_code_t err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, 0, TX_POWER_LEVEL);
+    APP_ERROR_CHECK(err_code);
+}
+
 /**@brief Function for application main entry.
  */
 
@@ -756,6 +770,7 @@ int main(void)
     // Start execution.
     NRF_LOG_INFO("GP-Temp-Fire started.");
     advertising_start();
+    tx_power_set();
 
     APP_ERROR_CHECK(max31865_spi_init());
     max31865_init();
@@ -783,7 +798,9 @@ int main(void)
                 // sprintf(buffer, "%02d:%02d", _time_min, _time_sec);
                 lv_label_set_text(fire_temp_label, buffer);
                 temp_i16 = temp * 100.0f;
-                ble_temp_fire_update(&m_temp, temp_i16);
+                if (_connected == true) {
+                    ble_temp_fire_update(&m_temp, temp_i16);
+                }
             }
             else {
                 APP_ERROR_CHECK(max31865_spi_init());
@@ -792,7 +809,9 @@ int main(void)
                 sprintf(buffer, "%.1f", temp);
                 lv_label_set_text(fire_temp_label, buffer);
                 temp_i16 = temp * 100.0f;
-                ble_temp_fire_update(&m_temp, temp_i16);    
+                if (_connected == true) {
+                    ble_temp_fire_update(&m_temp, temp_i16);
+                }
             }
 
             if (_connected == false) {
