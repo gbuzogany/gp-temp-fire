@@ -52,6 +52,9 @@ int _time_sec = 0;
 int _time_min = 0;
 // end rtc
 
+static unsigned int _watchdog_clock = 0;
+static unsigned int _last_update = 0;
+
 static bool _force_heating = false;
 static bool _connected = false;
 
@@ -163,6 +166,44 @@ static ble_gap_adv_data_t m_adv_data =
 
     }
 };
+
+/**@brief Handler for shutdown preparation.
+ */
+bool shutdown_handler(nrf_pwr_mgmt_evt_t event)
+{
+    uint32_t err_code = NRF_SUCCESS;
+
+    switch (event)
+    {
+        case NRF_PWR_MGMT_EVT_PREPARE_SYSOFF:
+            NRF_LOG_INFO("NRF_PWR_MGMT_EVT_PREPARE_SYSOFF");
+            APP_ERROR_CHECK(err_code);
+            break;
+
+        case NRF_PWR_MGMT_EVT_PREPARE_WAKEUP:
+            NRF_LOG_INFO("NRF_PWR_MGMT_EVT_PREPARE_WAKEUP");
+            UNUSED_VARIABLE(err_code);
+            break;
+
+        case NRF_PWR_MGMT_EVT_PREPARE_DFU:
+            NRF_LOG_INFO("Power management wants to reset to DFU mode.");
+            return false;
+            break;
+
+        case NRF_PWR_MGMT_EVT_PREPARE_RESET:
+            NRF_LOG_INFO("NRF_PWR_MGMT_EVT_PREPARE_RESET");
+            break;
+    }
+
+    err_code = app_timer_stop_all();
+    APP_ERROR_CHECK(err_code);
+
+    return true;
+}
+
+/**@brief Register application shutdown handler with priority 0. */
+NRF_PWR_MGMT_HANDLER_REGISTER(shutdown_handler, 0);
+
 
 /**@brief Function for assert macro callback.
  *
@@ -642,6 +683,7 @@ static void rtc_handler(nrf_drv_rtc_int_type_t int_type)
     if (_time_8hz >= 8) {
         _time_8hz = 0;
         _time_sec++;
+        _watchdog_clock++;
     }
     if (_time_sec >= 60) {
         _time_sec = 0;
@@ -652,6 +694,13 @@ static void rtc_handler(nrf_drv_rtc_int_type_t int_type)
         _force_heating = false;
         NRF_LOG_INFO("Force on turned OFF");
     }
+
+    // if didn't run logic for more than 10 seconds
+    if (_watchdog_clock - _last_update > 10) {
+        // reset
+        nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_RESET);
+    }
+
 }
 
 static void rtc_config(void)
@@ -787,7 +836,10 @@ int main(void)
         idle_state_handle();
         p_lcd->lcd_uninit();
 
+        _last_update = _watchdog_clock;
+
         if (should_read_temp) {
+
             float temp;
             int16_t temp_i16;
 
